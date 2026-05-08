@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UPSTORE — Instrucciones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* =============================================
+       VARIABLES & RESET
+    ============================================= */
+    :root {
+      --bg:        #080810;
+      --surface:   #0f0f1a;
+      --card:      #13131f;
+      --border:    #1e1e32;
+      --violet:    #7c3aed;
+      --violet-lt: #9d5cf0;
+      --neon:      #bf6fff;
+      --neon-glow: rgba(124,58,237,0.45);
+      --white:     #f0eeff;
+      --muted:     #6e6e8a;
+      --success:   #22c55e;
+      --warning:   #f59e0b;
+      --error:     #ef4444;
+      --radius:    14px;
+      --radius-lg: 22px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* BG GRID */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,58,237,0.18) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(124,58,237,0.04) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(124,58,237,0.04) 40px);
+      pointer-events: none;
+    }
+
+    /* =============================================
+       LAYOUT
+    ============================================= */
+    .page { position: relative; z-index: 1; }
+
+    /* HEADER */
+    .header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(8,8,16,.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .header-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--violet), var(--neon));
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 0 16px var(--neon-glow);
+    }
+    .header-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem; font-weight: 800; letter-spacing: .08em;
+      background: linear-gradient(90deg, var(--white) 40%, var(--neon));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .btn-back {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted); font-family: inherit; font-size: .8rem;
+      cursor: pointer; transition: all .2s;
+      text-decoration: none;
+    }
+    .btn-back:hover {
+      border-color: var(--violet);
+      color: var(--neon);
+      background: rgba(124,58,237,.08);
+    }
+
+    /* HERO */
+    .hero {
+      padding: 50px 24px 32px;
+      text-align: center;
+      max-width: 640px; margin: 0 auto;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 14px;
+      background: rgba(124,58,237,.15);
+      border: 1px solid rgba(124,58,237,.3);
+      border-radius: 999px;
+      font-size: .75rem; font-weight: 600;
+      color: var(--neon); letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem,6vw,2.6rem);
+      font-weight: 800; line-height: 1.1;
+      background: linear-gradient(135deg, var(--white) 30%, var(--neon));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+    .hero-sub {
+      color: var(--muted); font-size: .92rem; line-height: 1.6;
+    }
+
+    /* CONTENT */
+    .content {
+      max-width: 640px; margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    /* SECTION CARD */
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 26px;
+      margin-bottom: 20px;
+      animation: fadeUp .5s ease both;
+      position: relative; overflow: hidden;
+    }
+    .section-card::before {
+      content: ''; position: absolute; top: 0; right: 0;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%);
+    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+
+    .section-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 18px;
+    }
+    .section-num {
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--violet), var(--neon));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: .85rem; font-weight: 800;
+      box-shadow: 0 0 16px var(--neon-glow);
+    }
+    .section-icon {
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .icon-violet { background: rgba(124,58,237,.2); border: 1px solid rgba(124,58,237,.3); }
+    .icon-emerald { background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.25); }
+    .icon-amber  { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.25); }
+    .icon-blue   { background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.25); }
+    .icon-red    { background: rgba(239,68,68,.12);  border: 1px solid rgba(239,68,68,.25);  }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700;
+    }
+
+    .section-body p {
+      color: var(--muted); font-size: .88rem;
+      line-height: 1.75; margin-bottom: 10px;
+    }
+    .section-body p:last-child { margin-bottom: 0; }
+    .section-body strong { color: var(--white); }
+    .section-body .highlight { color: var(--neon); font-weight: 600; }
+    .section-body .warn { color: var(--warning); font-weight: 600; }
+    .section-body .danger { color: #fca5a5; font-weight: 600; }
+
+    /* STEPS LIST */
+    .steps-list { list-style: none; }
+    .steps-list li {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted); font-size: .87rem; line-height: 1.6;
+    }
+    .steps-list li:last-child { border-bottom: none; }
+    .step-dot {
+      flex-shrink: 0; margin-top: 3px;
+      width: 20px; height: 20px;
+      background: rgba(124,58,237,.2);
+      border: 1px solid rgba(124,58,237,.4);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .68rem; font-weight: 700; color: var(--neon);
+    }
+
+    /* ALERT BOXES */
+    .alert-box {
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex; gap: 12px; align-items: flex-start;
+      margin-top: 14px; font-size: .83rem; line-height: 1.6;
+    }
+    .alert-box .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .alert-warning {
+      background: rgba(245,158,11,.1);
+      border: 1px solid rgba(245,158,11,.25);
+      color: #fde68a;
+    }
+    .alert-error {
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.25);
+      color: #fca5a5;
+    }
+    .alert-success {
+      background: rgba(34,197,94,.1);
+      border: 1px solid rgba(34,197,94,.25);
+      color: #86efac;
+    }
+    .alert-info {
+      background: rgba(124,58,237,.1);
+      border: 1px solid rgba(124,58,237,.3);
+      color: var(--neon);
+    }
+
+    /* CODE / EXAMPLE BLOCKS */
+    .example-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: .82rem; line-height: 1.7;
+    }
+    .example-block .ex-label {
+      font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    .example-block .ex-url {
+      color: var(--neon); word-break: break-all;
+    }
+
+    /* BOTTOM CTA */
+    .bottom-cta {
+      text-align: center; padding: 10px 20px 60px;
+    }
+    .btn-primary-lg {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 36px;
+      background: linear-gradient(135deg, var(--violet), var(--neon));
+      border: none; border-radius: var(--radius);
+      color: #fff; font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; letter-spacing: .06em;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 0 28px var(--neon-glow);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-primary-lg:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 40px var(--neon-glow);
+    }
+
+    /* FOOTER */
+    .footer {
+      text-align: center; padding: 20px;
+      color: var(--muted); font-size: .76rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 420px) {
+      .section-card { padding: 22px 18px; }
+      .hero { padding: 36px 18px 24px; }
+    }
+  </style>
+</head>
+<body class="page">
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-brand">
+    <div class="header-icon">⚡</div>
+    <span class="header-name">UPSTORE</span>
+  </div>
+  <a href="index.html" class="btn-back">← Volver al panel</a>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">📋 Guía de uso</div>
+  <h1 class="hero-title">Instrucciones</h1>
+  <p class="hero-sub">Todo lo que necesitás saber para cargar pedidos de forma correcta y evitar errores.</p>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- 1. Cuenta pública -->
+  <div class="section-card" style="animation-delay:.05s">
+    <div class="section-header">
+      <div class="section-icon icon-violet">🔓</div>
+      <div class="section-title">1. La cuenta debe estar pública</div>
+    </div>
+    <div class="section-body">
+      <p>Este es el requisito <strong>más importante</strong>. La cuenta de Instagram del cliente debe estar configurada como <span class="highlight">pública</span> durante todo el proceso de envío del pedido.</p>
+      <div class="alert-box alert-warning">
+        <span class="alert-icon">⚠️</span>
+        <span>Si la cuenta está en modo privado, el pedido <strong>puede fallar o demorarse indefinidamente</strong>. Asegurate de verificarlo con el cliente antes de enviar el pedido.</span>
+      </div>
+      <div class="alert-box alert-error" style="margin-top:10px">
+        <span class="alert-icon">🚫</span>
+        <span>No procesamos devoluciones por pedidos fallados a causa de cuentas privadas.</span>
+      </div>
+      <p style="margin-top:12px;"><strong>¿Cómo hacerlo público?</strong> Instagram → Ajustes → Privacidad → Cuenta privada → <span class="highlight">Desactivar</span>.</p>
+    </div>
+  </div>
+
+  <!-- 2. Link del perfil -->
+  <div class="section-card" style="animation-delay:.1s">
+    <div class="section-header">
+      <div class="section-icon icon-blue">👤</div>
+      <div class="section-title">2. Cómo copiar el link del perfil</div>
+    </div>
+    <div class="section-body">
+      <p>Si el pedido es de <strong>seguidores</strong>, necesitás el link directo al perfil de la cuenta.</p>
+      <ul class="steps-list">
+        <li>
+          <span class="step-dot">1</span>
+          <span>Abrí Instagram y visitá el perfil del cliente.</span>
+        </li>
+        <li>
+          <span class="step-dot">2</span>
+          <span>Tocá los <strong>3 puntos (⋮)</strong> en la esquina superior derecha del perfil.</span>
+        </li>
+        <li>
+          <span class="step-dot">3</span>
+          <span>Seleccioná <strong>"Copiar link del perfil"</strong>.</span>
+        </li>
+        <li>
+          <span class="step-dot">4</span>
+          <span>Pegá el link en el campo correspondiente del formulario.</span>
+        </li>
+      </ul>
+      <div class="example-block">
+        <div class="ex-label">Ejemplo de link correcto</div>
+        <div class="ex-url">https://www.instagram.com/nombreusuario/</div>
+      </div>
+      <div class="alert-box alert-info" style="margin-top:12px">
+        <span class="alert-icon">💡</span>
+        <span>También podés escribirlo manualmente: <strong>instagram.com/nombreusuario</strong>. Asegurate de que el usuario sea el correcto.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Link de publicación -->
+  <div class="section-card" style="animation-delay:.15s">
+    <div class="section-header">
+      <div class="section-icon icon-emerald">📸</div>
+      <div class="section-title">3. Cómo copiar el link de una publicación</div>
+    </div>
+    <div class="section-body">
+      <p>Si el pedido es de <strong>likes</strong>, necesitás el link específico de la publicación que quiera impulsar.</p>
+      <ul class="steps-list">
+        <li>
+          <span class="step-dot">1</span>
+          <span>Abrí la publicación en Instagram (foto, reel o video).</span>
+        </li>
+        <li>
+          <span class="step-dot">2</span>
+          <span>Tocá los <strong>3 puntos (⋮)</strong> arriba a la derecha de la publicación.</span>
+        </li>
+        <li>
+          <span class="step-dot">3</span>
+          <span>Seleccioná <strong>"Copiar link"</strong>.</span>
+        </li>
+        <li>
+          <span class="step-dot">4</span>
+          <span>Pegá el link en el campo del formulario.</span>
+        </li>
+      </ul>
+      <div class="example-block">
+        <div class="ex-label">Ejemplo de link de publicación</div>
+        <div class="ex-url">https://www.instagram.com/p/CXaBCDE12fg/</div>
+      </div>
+      <div class="alert-box alert-warning" style="margin-top:12px">
+        <span class="alert-icon">⚠️</span>
+        <span>El link de la publicación debe ser público. Si la publicación está archivada o la cuenta es privada, el pedido fallará.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Cargar un pedido -->
+  <div class="section-card" style="animation-delay:.2s">
+    <div class="section-header">
+      <div class="section-icon icon-violet">🚀</div>
+      <div class="section-title">4. Cómo cargar un pedido correctamente</div>
+    </div>
+    <div class="section-body">
+      <p>Seguí estos pasos cada vez que cargues un pedido nuevo:</p>
+      <ul class="steps-list">
+        <li><span class="step-dot">1</span><span>Desde el panel, tocá <strong>"Recargar / Nuevo pedido"</strong>.</span></li>
+        <li><span class="step-dot">2</span><span>Seleccioná la <strong>red social</strong> (actualmente solo Instagram).</span></li>
+        <li><span class="step-dot">3</span><span>Elegí el <strong>servicio</strong>: Seguidores o Likes.</span></li>
+        <li><span class="step-dot">4</span><span>Ingresá el <strong>nombre del solicitante</strong> (puede ser el nombre del cliente o el tuyo).</span></li>
+        <li><span class="step-dot">5</span><span>Escribí la <strong>cantidad</strong> deseada. El precio se calcula automáticamente.</span></li>
+        <li><span class="step-dot">6</span><span>Pegá el <strong>link</strong> correcto según el servicio elegido.</span></li>
+        <li><span class="step-dot">7</span><span>Subí la <strong>imagen del comprobante</strong> de pago.</span></li>
+        <li><span class="step-dot">8</span><span>Revisá los datos en la sección <strong>"Revisar solicitud"</strong>.</span></li>
+        <li><span class="step-dot">9</span><span>Tocá <strong>"Enviar por WhatsApp"</strong> para confirmar el pedido.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 5. Elegir servicio y cantidad -->
+  <div class="section-card" style="animation-delay:.25s">
+    <div class="section-header">
+      <div class="section-icon icon-amber">⚙️</div>
+      <div class="section-title">5. Cómo elegir servicio, cantidad y revisar datos</div>
+    </div>
+    <div class="section-body">
+      <p><strong>Servicio:</strong> usá los botones de selección para elegir entre <span class="highlight">Seguidores</span> o <span class="highlight">Likes</span>. Según lo que elijas, el campo de link cambia automáticamente.</p>
+      <p><strong>Cantidad:</strong> podés ingresar cualquier número. El precio se actualiza automáticamente al escribir.</p>
+      <div class="example-block">
+        <div class="ex-label">Cálculo de precios</div>
+        <div style="color:var(--white); font-size:.85rem; line-height:1.8;">
+          Seguidores: cada 100 = <span style="color:var(--neon);font-weight:700;">$500 ARS</span><br>
+          Likes: cada 100 = <span style="color:var(--neon);font-weight:700;">$300 ARS</span>
+        </div>
+      </div>
+      <p>Antes de enviar, revisá siempre la sección <strong>"Revisar solicitud"</strong> al final del formulario. Muestra todos los datos ingresados para que puedas confirmarlos antes de enviar.</p>
+    </div>
+  </div>
+
+  <!-- 6. Tiempo de entrega -->
+  <div class="section-card" style="animation-delay:.3s">
+    <div class="section-header">
+      <div class="section-icon icon-blue">⏱️</div>
+      <div class="section-title">6. Tiempo de procesamiento</div>
+    </div>
+    <div class="section-body">
+      <p>Los pedidos pueden demorar entre <span class="highlight">10 y 20 minutos</span> en completarse desde que son aprobados por el equipo de UPSTORE.</p>
+      <div class="alert-box alert-info">
+        <span class="alert-icon">💡</span>
+        <span>El cliente puede empezar a ver los resultados progresivamente dentro de ese lapso. No es necesario hacer nada más después de enviar el pedido.</span>
+      </div>
+      <p style="margin-top:10px;">Si después de <strong>30 minutos</strong> el pedido no está completo, contactá soporte con el ID del pedido.</p>
+    </div>
+  </div>
+
+  <!-- 7. Verificar usuario/link -->
+  <div class="section-card" style="animation-delay:.35s">
+    <div class="section-header">
+      <div class="section-icon icon-red">🔍</div>
+      <div class="section-title">7. Verificá bien el usuario o link antes de enviar</div>
+    </div>
+    <div class="section-body">
+      <p>Este paso es <span class="warn">muy importante</span>. Una vez enviado el pedido, <strong>no se puede modificar ni redirigir</strong> a otra cuenta o publicación.</p>
+      <ul class="steps-list">
+        <li><span class="step-dot">✓</span><span>Confirmá con el cliente que el link que te pasó es el correcto.</span></li>
+        <li><span class="step-dot">✓</span><span>Abrí el link en el navegador antes de pegarlo para verificar que carga bien.</span></li>
+        <li><span class="step-dot">✓</span><span>Asegurate que el nombre de usuario no tenga errores de tipeo.</span></li>
+        <li><span class="step-dot">✓</span><span>Revisá la sección "Revisar solicitud" antes de enviar.</span></li>
+      </ul>
+      <div class="alert-box alert-error" style="margin-top:12px">
+        <span class="alert-icon">🚫</span>
+        <span>UPSTORE no se responsabiliza por pedidos enviados a perfiles o publicaciones incorrectas por error del revendedor.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Cuenta privada -->
+  <div class="section-card" style="animation-delay:.4s">
+    <div class="section-header">
+      <div class="section-icon icon-red">🔒</div>
+      <div class="section-title">8. Cuentas privadas — riesgo de falla</div>
+    </div>
+    <div class="section-body">
+      <p>Si la cuenta del cliente está <span class="danger">en modo privado</span> al momento de procesar el pedido, el sistema no podrá acceder al perfil y el pedido <strong>puede fallar o demorarse significativamente</strong>.</p>
+      <p><strong>¿Qué hacer?</strong></p>
+      <ul class="steps-list">
+        <li><span class="step-dot">1</span><span>Antes de enviar, pedile al cliente que ponga su cuenta en <span class="highlight">público</span>.</span></li>
+        <li><span class="step-dot">2</span><span>Indicale que la mantenga pública hasta recibir una confirmación de que el pedido está completo.</span></li>
+        <li><span class="step-dot">3</span><span>Una vez completado el pedido (10-20 min), puede volver a privada si lo desea.</span></li>
+      </ul>
+      <div class="alert-box alert-warning" style="margin-top:12px">
+        <span class="alert-icon">⚠️</span>
+        <span>Este requerimiento aplica también para Likes en publicaciones de cuentas privadas.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen final -->
+  <div class="section-card" style="animation-delay:.45s; border-color: rgba(124,58,237,.3);">
+    <div class="section-header">
+      <div class="section-icon icon-violet">📌</div>
+      <div class="section-title">Resumen rápido</div>
+    </div>
+    <div class="section-body">
+      <ul class="steps-list">
+        <li><span class="step-dot">✓</span><span>Cuenta pública antes y durante el pedido.</span></li>
+        <li><span class="step-dot">✓</span><span>Verificar link/usuario antes de enviar.</span></li>
+        <li><span class="step-dot">✓</span><span>Subir comprobante de pago (obligatorio).</span></li>
+        <li><span class="step-dot">✓</span><span>Revisar datos en "Revisar solicitud".</span></li>
+        <li><span class="step-dot">✓</span><span>Tiempo de entrega: 10 a 20 minutos.</span></li>
+        <li><span class="step-dot">✓</span><span>Ante cualquier inconveniente, contactar con el ID del pedido.</span></li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- CTA VOLVER -->
+<div class="bottom-cta">
+  <a href="index.html" class="btn-primary-lg">
+    ⚡ Volver al panel principal
+  </a>
+</div>
+
+<footer class="footer">UPSTORE © 2025 — Panel de Revendedor</footer>
+
+</body>
+</html>

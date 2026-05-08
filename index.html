@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UPSTORE — Tienda de crecimiento para redes sociales</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* =============================================
+       VARIABLES & RESET
+    ============================================= */
+    :root {
+      --bg:        #080810;
+      --surface:   #0f0f1a;
+      --card:      #13131f;
+      --border:    #1e1e32;
+      --violet:    #7c3aed;
+      --violet-lt: #9d5cf0;
+      --neon:      #bf6fff;
+      --neon-glow: rgba(124,58,237,0.45);
+      --white:     #f0eeff;
+      --muted:     #6e6e8a;
+      --success:   #22c55e;
+      --error:     #ef4444;
+      --warning:   #f59e0b;
+      --radius:    14px;
+      --radius-lg: 22px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =============================================
+       NOISE OVERLAY & BG GRID
+    ============================================= */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,58,237,0.18) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(124,58,237,0.04) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(124,58,237,0.04) 40px);
+      pointer-events: none;
+    }
+
+    /* =============================================
+       TOAST NOTIFICATIONS
+    ============================================= */
+    #toast-container {
+      position: fixed; top: 20px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .toast {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 20px;
+      border-radius: var(--radius);
+      font-size: .9rem; font-weight: 500;
+      backdrop-filter: blur(16px);
+      border: 1px solid;
+      animation: toastIn .35s cubic-bezier(.4,0,.2,1) forwards;
+      max-width: 320px;
+    }
+    .toast.success { background: rgba(34,197,94,.15); border-color: rgba(34,197,94,.3); color: #86efac; }
+    .toast.error   { background: rgba(239,68,68,.15);  border-color: rgba(239,68,68,.3);  color: #fca5a5; }
+    .toast.warning { background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.3); color: #fde68a; }
+    .toast.info    { background: rgba(124,58,237,.2);  border-color: rgba(124,58,237,.4); color: var(--neon); }
+    .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+    @keyframes toastIn  { from { opacity:0; transform:translateX(40px) scale(.95); } to { opacity:1; transform:none; } }
+    @keyframes toastOut { from { opacity:1; transform:none; } to { opacity:0; transform:translateX(40px) scale(.95); } }
+
+    /* =============================================
+       UTILITY
+    ============================================= */
+    .hidden { display: none !important; }
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .page { position: relative; z-index: 1; }
+
+    /* =============================================
+       LOGIN PAGE
+    ============================================= */
+    #page-login {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .login-card {
+      width: 100%; max-width: 420px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      box-shadow: 0 0 60px rgba(124,58,237,0.12), 0 24px 64px rgba(0,0,0,0.5);
+      animation: fadeUp .6s ease both;
+    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:none; } }
+
+    .brand {
+      text-align: center; margin-bottom: 36px;
+    }
+    .brand-logo {
+      display: inline-flex; align-items: center; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .brand-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--violet), var(--neon));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 0 24px var(--neon-glow);
+    }
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem; font-weight: 800;
+      letter-spacing: .08em;
+      background: linear-gradient(90deg, var(--white) 30%, var(--neon));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .brand-sub {
+      color: var(--muted); font-size: .82rem; letter-spacing: .04em;
+    }
+
+    .login-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem; font-weight: 700;
+      margin-bottom: 6px; text-align: center;
+    }
+    .login-hint { color: var(--muted); font-size: .82rem; text-align: center; margin-bottom: 28px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: .8rem; font-weight: 500;
+      color: var(--muted); margin-bottom: 8px; letter-spacing: .06em; text-transform: uppercase;
+    }
+    .form-control {
+      width: 100%; padding: 13px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--white); font-family: inherit; font-size: .95rem;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .form-control:focus {
+      border-color: var(--violet);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.18);
+    }
+    .form-control::placeholder { color: var(--muted); }
+
+    .btn-primary {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, var(--violet), var(--neon));
+      border: none; border-radius: var(--radius);
+      color: #fff; font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; letter-spacing: .06em;
+      cursor: pointer;
+      box-shadow: 0 0 24px var(--neon-glow);
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+      margin-top: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 36px var(--neon-glow); }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+    /* =============================================
+       DASHBOARD / MAIN PANEL
+    ============================================= */
+    #page-panel {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(8,8,16,.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .header-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--violet), var(--neon));
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 0 16px var(--neon-glow);
+    }
+    .header-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem; font-weight: 800; letter-spacing: .08em;
+      background: linear-gradient(90deg, var(--white) 40%, var(--neon));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .btn-logout {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted); font-family: inherit; font-size: .8rem;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-logout:hover { border-color: var(--error); color: #fca5a5; background: rgba(239,68,68,.08); }
+
+    /* Hero */
+    .hero {
+      padding: 60px 24px 40px;
+      text-align: center;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 14px;
+      background: rgba(124,58,237,.15);
+      border: 1px solid rgba(124,58,237,.3);
+      border-radius: 999px;
+      font-size: .75rem; font-weight: 600;
+      color: var(--neon); letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    .hero-tag-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 6px var(--neon);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem,7vw,3.5rem);
+      font-weight: 800; line-height: 1.05;
+      background: linear-gradient(135deg, var(--white) 30%, var(--neon) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 14px;
+    }
+    .hero-sub {
+      color: var(--muted); font-size: clamp(.9rem,3vw,1.05rem);
+      max-width: 340px; margin: 0 auto 10px;
+      line-height: 1.6;
+    }
+    .hero-user {
+      display: inline-block;
+      color: var(--neon); font-size: .82rem; font-weight: 500;
+      margin-top: 6px;
+    }
+
+    /* Main action cards */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 8px 20px 48px;
+      max-width: 500px; margin: 0 auto; width: 100%;
+    }
+
+    .action-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+      display: flex; align-items: center; gap: 20px;
+      position: relative; overflow: hidden;
+      text-decoration: none; color: inherit;
+    }
+    .action-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 80% at 100% 0%, rgba(124,58,237,0.08) 0%, transparent 70%);
+      opacity: 0; transition: opacity .3s;
+    }
+    .action-card:hover::before { opacity: 1; }
+    .action-card:hover {
+      border-color: rgba(124,58,237,.5);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(124,58,237,.15);
+    }
+    .action-card:active { transform: scale(.98); }
+
+    .card-icon-wrap {
+      flex-shrink: 0;
+      width: 54px; height: 54px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .card-icon-wrap.violet { background: rgba(124,58,237,.2); border: 1px solid rgba(124,58,237,.3); }
+    .card-icon-wrap.emerald { background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.25); }
+    .card-icon-wrap.amber  { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.25); }
+
+    .card-body { flex: 1; }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem; font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .card-desc { color: var(--muted); font-size: .82rem; line-height: 1.5; }
+
+    .card-arrow {
+      color: var(--muted); font-size: 1.2rem; flex-shrink: 0;
+      transition: transform .2s, color .2s;
+    }
+    .action-card:hover .card-arrow { transform: translateX(4px); color: var(--neon); }
+
+    /* =============================================
+       SUCCESS SCREEN
+    ============================================= */
+    #page-success {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .success-card {
+      background: var(--card);
+      border: 1px solid rgba(124,58,237,.3);
+      border-radius: var(--radius-lg);
+      padding: 48px 36px;
+      max-width: 440px; width: 100%;
+      box-shadow: 0 0 60px rgba(124,58,237,.15), 0 24px 64px rgba(0,0,0,.5);
+      animation: fadeUp .5s ease both;
+    }
+    .success-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--violet), var(--neon));
+      border-radius: 50%; margin: 0 auto 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 0 40px var(--neon-glow);
+    }
+    .success-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem; font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .success-id {
+      display: inline-block;
+      padding: 8px 20px;
+      background: rgba(124,58,237,.15);
+      border: 1px solid rgba(124,58,237,.3);
+      border-radius: 999px;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--neon); margin: 16px 0;
+    }
+    .success-msgs p {
+      color: var(--muted); font-size: .88rem; line-height: 1.7;
+      margin-bottom: 6px;
+    }
+    .success-msgs strong { color: var(--warning); }
+    .btn-new-order {
+      margin-top: 32px;
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, var(--violet), var(--neon));
+      border: none; border-radius: var(--radius);
+      color: #fff; font-family: 'Syne', sans-serif;
+      font-size: .95rem; font-weight: 700; letter-spacing: .06em;
+      cursor: pointer;
+      box-shadow: 0 0 24px var(--neon-glow);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-new-order:hover { transform:translateY(-2px); box-shadow: 0 0 36px var(--neon-glow); }
+
+    /* =============================================
+       MODAL
+    ============================================= */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%; max-width: 520px;
+      margin: auto;
+      padding: 32px 28px;
+      position: relative;
+      animation: fadeUp .35s ease both;
+      box-shadow: 0 0 60px rgba(124,58,237,.12), 0 32px 80px rgba(0,0,0,.6);
+    }
+    .modal-close {
+      position: absolute; top: 18px; right: 18px;
+      width: 32px; height: 32px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 1rem;
+      transition: all .2s;
+    }
+    .modal-close:hover { background: rgba(239,68,68,.1); border-color: var(--error); color: #fca5a5; }
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem; font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .modal-sub { color: var(--muted); font-size: .82rem; margin-bottom: 28px; }
+
+    /* Segment switch */
+    .segment-wrap {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px; gap: 4px; margin-bottom: 0;
+    }
+    .segment-btn {
+      flex: 1; padding: 10px;
+      background: transparent; border: none;
+      border-radius: 8px; color: var(--muted);
+      font-family: inherit; font-size: .88rem; font-weight: 500;
+      cursor: pointer; transition: all .2s;
+    }
+    .segment-btn.active {
+      background: linear-gradient(135deg, var(--violet), var(--neon));
+      color: #fff;
+      box-shadow: 0 2px 12px var(--neon-glow);
+    }
+
+    /* Form elements */
+    .form-row { margin-bottom: 18px; }
+    .form-row label {
+      display: block; font-size: .78rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 8px;
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236e6e8a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+      padding-right: 40px;
+    }
+    .price-display {
+      background: var(--surface);
+      border: 1px solid rgba(124,58,237,.3);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .price-label { color: var(--muted); font-size: .82rem; }
+    .price-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem; font-weight: 800;
+      color: var(--neon);
+    }
+
+    /* File upload */
+    .file-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .file-upload-area:hover, .file-upload-area.drag-over {
+      border-color: var(--violet);
+      background: rgba(124,58,237,.06);
+    }
+    .file-upload-area input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .file-upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .file-upload-text { color: var(--muted); font-size: .82rem; }
+    .file-upload-text span { color: var(--neon); }
+    .file-preview {
+      margin-top: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .file-preview img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
+    .file-preview-info { flex: 1; }
+    .file-preview-name { font-size: .82rem; font-weight: 500; }
+    .file-preview-status { font-size: .74rem; color: var(--muted); }
+    .file-preview-status.uploading { color: var(--neon); }
+    .file-preview-status.done { color: var(--success); }
+
+    /* Loader spinner */
+    .spinner {
+      display: inline-block; width: 18px; height: 18px;
+      border: 2px solid rgba(124,58,237,.3);
+      border-top-color: var(--neon);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Review box */
+    .review-box {
+      background: var(--surface);
+      border: 1px solid rgba(124,58,237,.25);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .review-box h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: .85rem; font-weight: 700;
+      color: var(--neon); letter-spacing: .08em;
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+    .review-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .83rem; gap: 12px;
+    }
+    .review-row:last-child { border-bottom: none; }
+    .review-key { color: var(--muted); flex-shrink: 0; }
+    .review-val { font-weight: 500; text-align: right; word-break: break-all; }
+
+    .modal-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .btn-send-wa {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, #075e54, #128c7e);
+      border: none; border-radius: var(--radius);
+      color: #fff; font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; letter-spacing: .04em;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 4px 20px rgba(7,94,84,.4);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-send-wa:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(7,94,84,.5); }
+    .btn-send-wa:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+    /* =============================================
+       PRICES MODAL
+    ============================================= */
+    .prices-tabs {
+      display: flex; gap: 8px; margin-bottom: 24px;
+    }
+    .price-tab {
+      flex: 1; padding: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted); font-family: inherit; font-size: .88rem;
+      cursor: pointer; transition: all .2s; font-weight: 500;
+    }
+    .price-tab.active {
+      background: rgba(124,58,237,.15);
+      border-color: rgba(124,58,237,.4);
+      color: var(--neon);
+    }
+    .price-table { width: 100%; border-collapse: collapse; }
+    .price-table th, .price-table td {
+      padding: 12px 14px; text-align: left;
+      font-size: .87rem;
+    }
+    .price-table th {
+      font-family: 'Syne', sans-serif;
+      font-size: .74rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .08em;
+      border-bottom: 1px solid var(--border);
+    }
+    .price-table td { border-bottom: 1px solid rgba(30,30,50,.8); }
+    .price-table tr:hover td { background: rgba(124,58,237,.05); }
+    .price-qty { font-weight: 700; color: var(--white); }
+    .price-amount {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      color: var(--neon);
+    }
+    .earnings-box {
+      background: rgba(124,58,237,.08);
+      border: 1px solid rgba(124,58,237,.2);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-top: 20px;
+    }
+    .earnings-box h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: .9rem; font-weight: 700; color: var(--neon);
+      margin-bottom: 8px;
+    }
+    .earnings-box p { color: var(--muted); font-size: .82rem; line-height: 1.6; }
+    .earnings-box strong { color: var(--white); }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    .footer {
+      text-align: center; padding: 20px;
+      color: var(--muted); font-size: .76rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    /* =============================================
+       RESPONSIVE
+    ============================================= */
+    @media (max-width: 400px) {
+      .login-card { padding: 36px 22px; }
+      .modal { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- =============================================
+     TOAST CONTAINER
+============================================= -->
+<div id="toast-container"></div>
+
+<!-- =============================================
+     PAGE: LOGIN
+============================================= -->
+<div id="page-login" class="page">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-logo">
+        <div class="brand-icon">⚡</div>
+        <span class="brand-name">UPSTORE</span>
+      </div>
+      <div class="brand-sub">Tienda de crecimiento para redes sociales</div>
+    </div>
+
+    <div class="login-title">Acceso de Revendedor</div>
+    <div class="login-hint">Ingresá tus credenciales para continuar</div>
+
+    <div class="form-group">
+      <label for="login-email">Correo electrónico</label>
+      <input id="login-email" type="email" class="form-control"
+             placeholder="tu@correo.com" autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label for="login-pass">Contraseña</label>
+      <input id="login-pass" type="password" class="form-control"
+             placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <button class="btn-primary" onclick="doLogin()">Iniciar sesión</button>
+  </div>
+</div>
+
+<!-- =============================================
+     PAGE: PANEL PRINCIPAL
+============================================= -->
+<div id="page-panel" class="page hidden">
+  <header class="header">
+    <div class="header-brand">
+      <div class="header-icon">⚡</div>
+      <span class="header-name">UPSTORE</span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">
+      <span>⬡</span> Cerrar sesión
+    </button>
+  </header>
+
+  <div class="hero">
+    <div class="hero-tag"><span class="hero-tag-dot"></span> Panel activo</div>
+    <h1 class="hero-title">UPSTORE</h1>
+    <p class="hero-sub">Tienda de crecimiento para redes sociales</p>
+    <span class="hero-user" id="hero-user-label"></span>
+  </div>
+
+  <div class="cards-grid">
+    <!-- Botón 1: Instrucciones -->
+    <a href="instrucciones.html" class="action-card" onclick="return openInstrucciones()">
+      <div class="card-icon-wrap violet">📋</div>
+      <div class="card-body">
+        <div class="card-title">Instrucciones</div>
+        <div class="card-desc">Cómo cargar pedidos, links y consejos importantes</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <!-- Botón 2: Nuevo pedido -->
+    <div class="action-card" onclick="openOrderModal()">
+      <div class="card-icon-wrap emerald">🚀</div>
+      <div class="card-body">
+        <div class="card-title">Recargar / Nuevo pedido</div>
+        <div class="card-desc">Cargá seguidores o likes para tu cliente</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </div>
+
+    <!-- Botón 3: Precios -->
+    <div class="action-card" onclick="openPricesModal()">
+      <div class="card-icon-wrap amber">💰</div>
+      <div class="card-body">
+        <div class="card-title">Precios y ganancias</div>
+        <div class="card-desc">Tabla de precios actuales y ganancias por revendedor</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </div>
+  </div>
+
+  <footer class="footer">UPSTORE © 2025 — Panel de Revendedor</footer>
+</div>
+
+<!-- =============================================
+     PAGE: SUCCESS
+============================================= -->
+<div id="page-success" class="page hidden">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Solicitud enviada</div>
+    <div class="success-id" id="success-id-label">UP-0001</div>
+    <div class="success-msgs">
+      <p>Espere unos minutos hasta que sea aprobada su solicitud.</p>
+      <p>Puede demorar entre <strong>10 y 20 minutos</strong> completarse.</p>
+      <p>Recuerde indicarle al cliente que su cuenta debe <strong>permanecer pública</strong> durante el proceso.</p>
+    </div>
+    <button class="btn-new-order" onclick="backToPanel()">⚡ Enviar otro pedido</button>
+  </div>
+</div>
+
+<!-- =============================================
+     MODAL: NUEVO PEDIDO
+============================================= -->
+<div id="modal-order" class="modal-overlay hidden" onclick="closeOrderIfOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeOrderModal()">✕</button>
+    <div class="modal-title">🚀 Nuevo Pedido</div>
+    <div class="modal-sub">Completá los datos para enviar la solicitud</div>
+
+    <!-- Red social -->
+    <div class="form-row">
+      <label>Red social</label>
+      <select id="order-network" class="form-control">
+        <option value="Instagram">Instagram</option>
+      </select>
+    </div>
+
+    <!-- Servicio: seguidores / likes -->
+    <div class="form-row">
+      <label>Servicio</label>
+      <div class="segment-wrap">
+        <button class="segment-btn active" id="btn-seg-followers" onclick="setService('seguidores')">
+          👥 Seguidores
+        </button>
+        <button class="segment-btn" id="btn-seg-likes" onclick="setService('likes')">
+          ❤️ Likes
+        </button>
+      </div>
+    </div>
+
+    <!-- Nombre del solicitante -->
+    <div class="form-row">
+      <label>Nombre del solicitante</label>
+      <input id="order-name" type="text" class="form-control"
+             placeholder="Ej: Juan Pérez" />
+    </div>
+
+    <!-- Cantidad -->
+    <div class="form-row">
+      <label>Cantidad</label>
+      <input id="order-qty" type="number" class="form-control"
+             placeholder="Ej: 100" min="1" oninput="calcPrice()" />
+    </div>
+
+    <!-- Precio calculado -->
+    <div class="form-row">
+      <label>Precio estimado</label>
+      <div class="price-display">
+        <span class="price-label">Total a cobrar</span>
+        <span class="price-value" id="price-calculated">$0 ARS</span>
+      </div>
+    </div>
+
+    <!-- Link Instagram -->
+    <div class="form-row">
+      <label id="link-label">Link del perfil de Instagram</label>
+      <input id="order-link" type="url" class="form-control"
+             placeholder="https://instagram.com/usuario" />
+      <div style="font-size:.74rem;color:var(--muted);margin-top:6px;" id="link-hint">
+        Debe ser el link público del perfil
+      </div>
+    </div>
+
+    <!-- Comprobante -->
+    <div class="form-row">
+      <label>Comprobante de pago</label>
+      <div class="file-upload-area" id="upload-area">
+        <input type="file" id="order-file" accept="image/*" onchange="handleFileSelect(event)" />
+        <div class="file-upload-icon">🖼️</div>
+        <div class="file-upload-text">Arrastrá o <span>seleccioná</span> la imagen</div>
+      </div>
+      <div id="file-preview" class="file-preview hidden">
+        <img id="file-thumb" src="" alt="preview" />
+        <div class="file-preview-info">
+          <div class="file-preview-name" id="file-name">archivo.jpg</div>
+          <div class="file-preview-status" id="file-status">Listo</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="modal-divider" />
+
+    <!-- Revisión -->
+    <div class="review-box" id="review-box">
+      <h4>⚙ Revisar solicitud</h4>
+      <div class="review-row"><span class="review-key">Red social</span>  <span class="review-val" id="rv-network">—</span></div>
+      <div class="review-row"><span class="review-key">Servicio</span>    <span class="review-val" id="rv-service">—</span></div>
+      <div class="review-row"><span class="review-key">Solicitante</span> <span class="review-val" id="rv-name">—</span></div>
+      <div class="review-row"><span class="review-key">Cantidad</span>    <span class="review-val" id="rv-qty">—</span></div>
+      <div class="review-row"><span class="review-key">Precio</span>      <span class="review-val" id="rv-price">—</span></div>
+      <div class="review-row"><span class="review-key">Link</span>        <span class="review-val" id="rv-link">—</span></div>
+      <div class="review-row"><span class="review-key">Comprobante</span><span class="review-val" id="rv-img">—</span></div>
+    </div>
+
+    <!-- Botón enviar WhatsApp -->
+    <button class="btn-send-wa" id="btn-send-wa" onclick="submitOrder()">
+      <span>💬</span> Enviar por WhatsApp
+    </button>
+  </div>
+</div>
+
+<!-- =============================================
+     MODAL: PRECIOS
+============================================= -->
+<div id="modal-prices" class="modal-overlay hidden" onclick="closePricesIfOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closePricesModal()">✕</button>
+    <div class="modal-title">💰 Precios y ganancias</div>
+    <div class="modal-sub">Lista oficial — no modificable por revendedor</div>
+
+    <div class="prices-tabs">
+      <button class="price-tab active" onclick="switchPriceTab('followers',this)">👥 Seguidores</button>
+      <button class="price-tab" onclick="switchPriceTab('likes',this)">❤️ Likes</button>
+    </div>
+
+    <div id="tab-followers">
+      <table class="price-table">
+        <thead><tr><th>Cantidad</th><th>Precio (ARS)</th></tr></thead>
+        <tbody>
+          <tr><td class="price-qty">100</td><td class="price-amount">$500</td></tr>
+          <tr><td class="price-qty">200</td><td class="price-amount">$1.000</td></tr>
+          <tr><td class="price-qty">500</td><td class="price-amount">$2.500</td></tr>
+          <tr><td class="price-qty">1.000</td><td class="price-amount">$5.000</td></tr>
+          <tr><td class="price-qty">2.000</td><td class="price-amount">$10.000</td></tr>
+          <tr><td class="price-qty">5.000</td><td class="price-amount">$25.000</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="tab-likes" class="hidden">
+      <table class="price-table">
+        <thead><tr><th>Cantidad</th><th>Precio (ARS)</th></tr></thead>
+        <tbody>
+          <tr><td class="price-qty">100</td><td class="price-amount">$300</td></tr>
+          <tr><td class="price-qty">200</td><td class="price-amount">$600</td></tr>
+          <tr><td class="price-qty">500</td><td class="price-amount">$1.500</td></tr>
+          <tr><td class="price-qty">1.000</td><td class="price-amount">$3.000</td></tr>
+          <tr><td class="price-qty">2.000</td><td class="price-amount">$6.000</td></tr>
+          <tr><td class="price-qty">5.000</td><td class="price-amount">$15.000</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="earnings-box">
+      <h4>📈 Ganancias para revendedores</h4>
+      <p>Cuanto más pedidos cargues, <strong>más ganancia generás</strong>. Podés ofrecer estos servicios a tus clientes al precio que quieras.</p>
+      <p style="margin-top:8px;">Recordá: el sistema calcula automáticamente el precio base. El revendedor decide su margen de ganancia.</p>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     SCRIPT
+============================================= -->
+<script>
+/* ==============================================
+   CONFIG
+   Las credenciales están ofuscadas con Base64 +
+   inversión de string. No es seguridad real,
+   pero dificulta lectura directa del código.
+============================================= */
+const _c = (s) => atob(s).split('').reverse().join('');
+const _AUTH = {
+  // 'revendedor122@upstore.com' → reversed → base64
+  e: _c('bW9jLmVyb3RzcHVAMjIxcm9kZWRuZXZlcg=='),
+  // 'mildos24' → reversed → base64
+  p: _c('NDJzb2RsaW0=')
+};
+
+/* Número WhatsApp del destinatario */
+const WA_NUMBER = '2646706973';
+/* Tu API KEY de ImgBB — pegá tu clave acá */
+const API_KEY_IMGBB = 'TU_API_KEY_IMGBB_AQUI';
+
+/* ——————————————————————————————————————————
+   ESTADO GLOBAL
+—————————————————————————————————————————— */
+let currentService = 'seguidores'; // 'seguidores' | 'likes'
+let uploadedImageUrl = '';          // URL de ImgBB tras subir
+let isUploading = false;
+
+/* ——————————————————————————————————————————
+   TOASTS
+—————————————————————————————————————————— */
+function showToast(msg, type = 'info', duration = 3500) {
+  const icons = { success: '✓', error: '✕', warning: '⚠', info: '⚡' };
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${msg}</span>`;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toastOut .35s ease forwards';
+    setTimeout(() => el.remove(), 350);
+  }, duration);
+}
+
+/* ——————————————————————————————————————————
+   AUTH
+—————————————————————————————————————————— */
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value.trim();
+
+  if (!email || !pass) {
+    showToast('Completá todos los campos.', 'warning');
+    return;
+  }
+  if (email !== _AUTH.e || pass !== _AUTH.p) {
+    showToast('Credenciales incorrectas. Verificá tus datos.', 'error');
+    return;
+  }
+
+  /* Guardar sesión */
+  localStorage.setItem('ups_session', '1');
+  localStorage.setItem('ups_user', email);
+  showToast('¡Bienvenido a UPSTORE!', 'success');
+  setTimeout(() => showPanel(), 400);
+}
+
+function doLogout() {
+  localStorage.removeItem('ups_session');
+  localStorage.removeItem('ups_user');
+  showPage('login');
+  showToast('Sesión cerrada.', 'info');
+}
+
+function checkSession() {
+  if (localStorage.getItem('ups_session') === '1') {
+    showPanel();
+  } else {
+    showPage('login');
+  }
+}
+
+/* ——————————————————————————————————————————
+   PAGES
+—————————————————————————————————————————— */
+function showPage(name) {
+  ['login','panel','success'].forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.classList.add('hidden');
+  });
+  const target = document.getElementById('page-' + name);
+  if (target) target.classList.remove('hidden');
+}
+
+function showPanel() {
+  showPage('panel');
+  const user = localStorage.getItem('ups_user') || '';
+  const label = document.getElementById('hero-user-label');
+  if (label) label.textContent = '👤 ' + user;
+}
+
+function backToPanel() {
+  showPage('panel');
+}
+
+/* ——————————————————————————————————————————
+   INSTRUCCIONES
+—————————————————————————————————————————— */
+function openInstrucciones() {
+  window.location.href = 'instrucciones.html';
+  return false;
+}
+
+/* ——————————————————————————————————————————
+   ORDER MODAL
+—————————————————————————————————————————— */
+function openOrderModal() {
+  resetOrderForm();
+  document.getElementById('modal-order').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOrderModal() {
+  document.getElementById('modal-order').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function closeOrderIfOutside(e) {
+  if (e.target.id === 'modal-order') closeOrderModal();
+}
+
+function resetOrderForm() {
+  currentService = 'seguidores';
+  uploadedImageUrl = '';
+  isUploading = false;
+  document.getElementById('order-name').value = '';
+  document.getElementById('order-qty').value  = '';
+  document.getElementById('order-link').value = '';
+  document.getElementById('order-file').value = '';
+  document.getElementById('price-calculated').textContent = '$0 ARS';
+  document.getElementById('file-preview').classList.add('hidden');
+  document.getElementById('upload-area').style.display = '';
+  setService('seguidores', false); // sin toast al abrir
+  updateReview();
+}
+
+/* Cambiar servicio: seguidores / likes */
+function setService(type, toast = true) {
+  currentService = type;
+  document.getElementById('btn-seg-followers').classList.toggle('active', type === 'seguidores');
+  document.getElementById('btn-seg-likes').classList.toggle('active', type === 'likes');
+
+  const linkLabel = document.getElementById('link-label');
+  const linkHint  = document.getElementById('link-hint');
+  const linkInput = document.getElementById('order-link');
+
+  if (type === 'seguidores') {
+    linkLabel.textContent = 'Link del perfil de Instagram';
+    linkHint.textContent  = 'Debe ser el link público del perfil';
+    linkInput.placeholder = 'https://instagram.com/usuario';
+  } else {
+    linkLabel.textContent = 'Link de la publicación';
+    linkHint.textContent  = 'Debe ser el link de la publicación específica';
+    linkInput.placeholder = 'https://instagram.com/p/XXXXXXX';
+  }
+  calcPrice();
+}
+
+/* Calcular precio */
+function calcPrice() {
+  const qty   = parseInt(document.getElementById('order-qty').value) || 0;
+  const rate  = currentService === 'seguidores' ? 500 : 300; // por cada 100
+  const total = Math.ceil(qty / 100) * rate;
+  const fmt   = total.toLocaleString('es-AR');
+  document.getElementById('price-calculated').textContent = qty > 0 ? `$${fmt} ARS` : '$0 ARS';
+  updateReview();
+}
+
+/* Actualizar box de revisión */
+function updateReview() {
+  const network = document.getElementById('order-network').value || '—';
+  const name    = document.getElementById('order-name').value.trim() || '—';
+  const qty     = document.getElementById('order-qty').value || '—';
+  const link    = document.getElementById('order-link').value.trim() || '—';
+  const price   = document.getElementById('price-calculated').textContent;
+
+  document.getElementById('rv-network').textContent = network;
+  document.getElementById('rv-service').textContent = currentService === 'seguidores' ? '👥 Seguidores' : '❤️ Likes';
+  document.getElementById('rv-name').textContent    = name;
+  document.getElementById('rv-qty').textContent     = qty;
+  document.getElementById('rv-price').textContent   = price;
+  document.getElementById('rv-link').textContent    = link.length > 40 ? link.slice(0, 38) + '…' : link;
+  document.getElementById('rv-img').textContent     = uploadedImageUrl ? '✓ Subido' : '—';
+}
+
+/* Live update review on typing */
+['order-name','order-qty','order-link'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateReview);
+});
+
+/* ——————————————————————————————————————————
+   IMGBB UPLOAD
+—————————————————————————————————————————— */
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  /* Mostrar preview */
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('file-thumb').src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+
+  document.getElementById('file-name').textContent   = file.name;
+  document.getElementById('file-status').textContent = 'Subiendo…';
+  document.getElementById('file-status').className   = 'file-preview-status uploading';
+  document.getElementById('file-preview').classList.remove('hidden');
+  document.getElementById('upload-area').style.display = 'none';
+
+  uploadToImgBB(file);
+}
+
+async function uploadToImgBB(file) {
+  isUploading = true;
+  uploadedImageUrl = '';
+  updateReview();
+
+  const statusEl = document.getElementById('file-status');
+  statusEl.innerHTML = '<span class="spinner"></span>Subiendo imagen…';
+
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY_IMGBB}`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      uploadedImageUrl = data.data.url;
+      statusEl.textContent = '✓ Imagen subida correctamente';
+      statusEl.className   = 'file-preview-status done';
+      showToast('Comprobante subido correctamente.', 'success');
+    } else {
+      throw new Error(data.error?.message || 'Error desconocido');
+    }
+  } catch (err) {
+    statusEl.textContent = '✕ Error al subir. Reintentá.';
+    statusEl.className   = 'file-preview-status';
+    showToast('Error al subir la imagen: ' + err.message, 'error');
+    /* Resetear para que el usuario pueda reintentar */
+    uploadedImageUrl = '';
+    document.getElementById('file-preview').classList.add('hidden');
+    document.getElementById('upload-area').style.display = '';
+    document.getElementById('order-file').value = '';
+  }
+
+  isUploading = false;
+  updateReview();
+}
+
+/* ——————————————————————————————————————————
+   ID CONSECUTIVO
+—————————————————————————————————————————— */
+function getNextOrderId() {
+  const current = parseInt(localStorage.getItem('ups_order_seq') || '0');
+  const next = current + 1;
+  localStorage.setItem('ups_order_seq', String(next));
+  return 'UP-' + String(next).padStart(4, '0');
+}
+
+/* ——————————————————————————————————————————
+   SUBMIT ORDER → WHATSAPP
+—————————————————————————————————————————— */
+function submitOrder() {
+  /* Validar campos */
+  const name  = document.getElementById('order-name').value.trim();
+  const qty   = parseInt(document.getElementById('order-qty').value) || 0;
+  const link  = document.getElementById('order-link').value.trim();
+
+  if (!name) { showToast('Ingresá el nombre del solicitante.', 'warning'); return; }
+  if (qty <= 0) { showToast('Ingresá una cantidad válida.', 'warning'); return; }
+  if (!link)  { showToast('Ingresá el link de Instagram.', 'warning'); return; }
+  if (isUploading) { showToast('Esperá a que termine de subir el comprobante.', 'info'); return; }
+  if (!uploadedImageUrl) { showToast('Debés subir el comprobante de pago para continuar.', 'error'); return; }
+
+  /* Construir mensaje */
+  const orderId  = getNextOrderId();
+  const network  = document.getElementById('order-network').value;
+  const service  = currentService === 'seguidores' ? 'Seguidores' : 'Likes';
+  const price    = document.getElementById('price-calculated').textContent;
+  const now      = new Date();
+  const fecha    = now.toLocaleDateString('es-AR');
+  const hora     = now.toLocaleTimeString('es-AR');
+
+  const msg =
+`⚡ *UPSTORE — NUEVO PEDIDO*
+
+🆔 *ID:* ${orderId}
+📱 *Red social:* ${network}
+⚙️ *Servicio:* ${service}
+👤 *Solicitante:* ${name}
+🔢 *Cantidad:* ${qty}
+💰 *Precio total:* ${price}
+🔗 *Link:* ${link}
+🖼️ *Comprobante:* ${uploadedImageUrl}
+📅 *Fecha:* ${fecha} – ${hora}`;
+
+  const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+  /* Guardar ID para mostrarlo en pantalla de éxito */
+  sessionStorage.setItem('ups_last_id', orderId);
+
+  /* Abrir WhatsApp en nueva pestaña */
+  window.open(waUrl, '_blank');
+
+  /* Cerrar modal */
+  closeOrderModal();
+
+  /* Mostrar pantalla de éxito */
+  document.getElementById('success-id-label').textContent = `ID: ${orderId}`;
+  showPage('success');
+}
+
+/* ——————————————————————————————————————————
+   PRICES MODAL
+—————————————————————————————————————————— */
+function openPricesModal() {
+  document.getElementById('modal-prices').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePricesModal() {
+  document.getElementById('modal-prices').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function closePricesIfOutside(e) {
+  if (e.target.id === 'modal-prices') closePricesModal();
+}
+
+function switchPriceTab(tab, btn) {
+  document.getElementById('tab-followers').classList.toggle('hidden', tab !== 'followers');
+  document.getElementById('tab-likes').classList.toggle('hidden', tab !== 'likes');
+  document.querySelectorAll('.price-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+/* ——————————————————————————————————————————
+   TECLADO: ESC cierra modales
+—————————————————————————————————————————— */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeOrderModal();
+    closePricesModal();
+  }
+});
+
+/* ——————————————————————————————————————————
+   ENTER en login
+—————————————————————————————————————————— */
+['login-email','login-pass'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+});
+
+/* ——————————————————————————————————————————
+   INIT
+—————————————————————————————————————————— */
+checkSession();
+</script>
+
+</body>
+</html>
