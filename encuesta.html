@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Validacion - Encuesta Las Flores</title>
+<style>
+:root{
+  --bg:#f5f7fb;--card:#fff;--ink:#151827;--muted:#667085;--line:#e4e8f0;
+  --primary:#4f46e5;--primary-2:#2563eb;--ok:#079669;--warn:#c98212;--bad:#c2413a;
+  --ok-bg:#eaf8f1;--warn-bg:#fff7df;--bad-bg:#fff0ef;--blue-bg:#edf4ff;
+  --shadow:0 10px 28px rgba(15,23,42,.055);--radius:12px
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(1360px,100%);margin:auto;padding:0 22px}
+.top{background:#111827;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 0}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:#aeb8cc}
+h1{font-size:27px;line-height:1.05;margin:4px 0 5px;letter-spacing:0;font-weight:850}
+.sub{color:#d5dbeb;font-size:14px}
+.status{margin-top:7px;color:#b9c3d6;font-size:11px}
+.refresh{border:1px solid rgba(255,255,255,.16);border-radius:10px;background:#fff;color:#1f2a44;padding:10px 14px;font-weight:800;min-height:44px}
+.refresh:hover{background:#f4f7ff}
+main{padding:16px 0 40px}
+.controlPanel{position:sticky;top:0;z-index:5;background:rgba(245,247,251,.96);backdrop-filter:blur(10px);padding:8px 0 4px;margin:-8px 0 8px}
+.filters{display:grid;grid-template-columns:190px 160px minmax(240px,1fr);gap:10px;margin-bottom:10px}
+.field{display:grid;gap:5px;min-width:0}
+.field label{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.08em;color:#596275}
+.ctrl{height:44px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:0 12px;color:var(--ink);outline:none;min-width:0}
+.ctrl:focus{border-color:#9aa5ff;box-shadow:0 0 0 3px rgba(79,70,229,.09)}
+.quickNav{display:grid;gap:8px}
+.quickNav a{display:block;text-decoration:none;color:#394150;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:13px;font-weight:850}
+.quickNav a:hover{border-color:#b9c2d6;background:#f9fbff}
+.dashboard{display:grid;gap:14px}
+.summaryCard{border-color:#d8ddff;background:linear-gradient(180deg,#fff,#fbfcff)}
+.verdict{font-size:20px;line-height:1.2;font-weight:850;margin-bottom:7px}
+.summaryText{color:#3c4658;max-width:860px}
+.drawerFab{position:fixed;right:14px;bottom:14px;z-index:20;border:0;background:var(--primary);color:#fff;border-radius:999px;padding:13px 16px;font-weight:900;box-shadow:0 12px 30px rgba(79,70,229,.28)}
+.drawerOverlay{position:fixed;inset:0;background:rgba(17,24,39,.34);z-index:30;opacity:0;pointer-events:none;transition:.18s}
+.drawer{position:fixed;top:0;right:0;height:100dvh;width:min(360px,92vw);z-index:31;background:#f7f9fd;border-left:1px solid var(--line);box-shadow:-18px 0 44px rgba(15,23,42,.18);transform:translateX(105%);transition:.2s;display:grid;grid-template-rows:auto 1fr}
+.drawer.open{transform:translateX(0)}
+.drawerOverlay.open{opacity:1;pointer-events:auto}
+.drawerHead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--line);background:#fff}
+.drawerTitle{font-weight:900;font-size:16px}
+.drawerClose{border:1px solid var(--line);background:#fff;border-radius:10px;width:38px;height:38px;font-weight:900}
+.drawerBody{padding:14px;overflow:auto;display:grid;gap:16px;align-content:start}
+.drawerBlock{display:grid;gap:8px}
+.drawerBlockTitle{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}
+.actions{display:grid;gap:8px}
+.actionBtn{border:1px solid var(--line);background:#fff;color:#253044;border-radius:10px;padding:9px 11px;font-size:12px;font-weight:850}
+.actionBtn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.actionBtn:hover{filter:brightness(.98);border-color:#b8c0d4}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;min-width:0}
+.metric{display:flex;justify-content:space-between;gap:12px;min-height:96px}
+.label{font-size:10px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+.big{font-size:30px;line-height:1.05;font-weight:850;margin:7px 0 3px}
+.small{font-size:11px;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;white-space:nowrap}
+.badge.ok{background:var(--ok-bg);color:var(--ok)}.badge.warn{background:var(--warn-bg);color:var(--warn)}.badge.bad{background:var(--bad-bg);color:var(--bad)}.badge.info{background:var(--blue-bg);color:var(--primary-2)}
+.sectionHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.sectionTitle{font-size:16px;line-height:1.22;font-weight:850}
+.sectionHint{font-size:12px;color:var(--muted);margin-top:3px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.gridDemand{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.gridCommerce{display:grid;grid-template-columns:.95fr 1.05fr;gap:14px}
+.signals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.signal{border:1px solid var(--line);border-radius:10px;background:#fbfcff;padding:11px;min-height:74px}
+.signal b{display:block;font-size:27px;line-height:1.05}
+.signal span{display:block;color:var(--muted);font-size:12px;margin-top:5px}
+.bar{margin:10px 0}
+.barTop{display:flex;justify-content:space-between;gap:10px;margin-bottom:5px;font-size:12px}
+.barTop span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.barTop b{font-variant-numeric:tabular-nums}
+.track{height:10px;background:#edf0f5;border-radius:999px;overflow:hidden}
+.fill{height:100%;min-width:3px;background:linear-gradient(90deg,var(--primary),var(--primary-2));border-radius:999px}
+.fill.ok{background:var(--ok)}.fill.warn{background:var(--warn)}.fill.bad{background:var(--bad)}
+.splitRows{display:grid;gap:8px}
+.rowItem{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fbfcff}
+.rowItem strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.rowItem em{font-style:normal;color:var(--muted);font-size:11px}
+.pillList{display:flex;flex-wrap:wrap;gap:7px}
+.pill{border:1px solid #dfe5f2;background:#f8faff;color:#344054;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:750}
+.pill.focus{background:#eef2ff;border-color:#c7d2fe;color:#3730a3}
+.quoteGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.quote{border:1px solid var(--line);border-radius:10px;background:#fbfcff;padding:10px;min-height:58px}
+.quote p{margin:0;color:#273044;overflow-wrap:anywhere}
+.quote small{display:block;color:var(--muted);margin-top:7px}
+.contacts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.contactList{display:grid;gap:8px;max-height:310px;overflow:auto;padding-right:2px}
+.contact{border:1px solid var(--line);border-radius:10px;background:#fbfcff;padding:10px}
+.contactTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.contactName{font-weight:850;overflow-wrap:anywhere}
+.contactMeta{color:var(--muted);font-size:12px;margin-top:4px;overflow-wrap:anywhere}
+.privateText{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.02em}
+.locked .phoneValue{filter:blur(3px);user-select:none}
+.tableWrap{overflow:auto;max-height:430px;border:1px solid var(--line);border-radius:10px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:9px 10px;max-width:320px;min-width:150px;overflow-wrap:anywhere}
+th{position:sticky;top:0;background:#f9fafc;color:#596275;z-index:1;font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+.empty{padding:22px;text-align:center;color:var(--muted);font-size:12px}
+.note{font-size:11px;color:var(--muted);margin-top:8px}
+.detailGroup{border:1px solid var(--line);background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.detailGroup>summary{list-style:none;padding:15px;font-weight:900;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.detailGroup>summary::-webkit-details-marker{display:none}
+.detailGroup>summary:after{content:"Abrir";font-size:11px;color:var(--primary);background:var(--blue-bg);padding:5px 8px;border-radius:999px}
+.detailGroup[open]>summary{border-bottom:1px solid var(--line)}
+.detailGroup[open]>summary:after{content:"Cerrar"}
+.detailInner{display:grid;gap:14px;padding:14px}
+@media(max-width:1060px){.metrics{grid-template-columns:repeat(2,1fr)}.grid2,.gridDemand,.gridCommerce,.contacts{grid-template-columns:1fr}.quoteGrid{grid-template-columns:1fr}}
+@media(max-width:720px){
+  body{font-size:15px;line-height:1.52}
+  .wrap{padding:0 12px}
+  .hero{align-items:flex-start;flex-direction:column;padding:18px 0}
+  .refresh{width:100%;font-size:15px}
+  h1{font-size:26px}
+  .sub{font-size:15px}
+  .status{font-size:12px}
+  main{padding-top:8px}
+  .controlPanel{position:static;background:transparent;backdrop-filter:none;padding:0;margin:0 0 10px}
+  .filters{grid-template-columns:1fr;gap:8px;margin-bottom:9px}
+  .field label{font-size:11px}
+  .ctrl{height:46px;font-size:15px;border-radius:11px}
+  .drawerFab{right:12px;bottom:12px;padding:13px 15px}
+  .drawerBody{padding:12px}
+  .quickNav a{padding:12px;font-size:14px}
+  .metrics{grid-template-columns:1fr 1fr;gap:8px}
+  .card{padding:14px;border-radius:13px}
+  .summaryCard{gap:12px}
+  .verdict{font-size:22px}
+  .summaryText{font-size:14px}
+  .sectionHead{display:grid;gap:8px;margin-bottom:11px}
+  .sectionTitle{font-size:18px}
+  .sectionHint{display:none}
+  .signals{grid-template-columns:1fr;gap:8px}
+  .signal{min-height:auto;padding:12px}
+  .signal b{font-size:31px}
+  .signal span{font-size:13px}
+  .metric{display:block;min-height:112px}
+  .big{font-size:30px}
+  .label{font-size:11px}
+  .small{font-size:12px}
+  .barTop{font-size:13px;align-items:flex-start}
+  .barTop span{white-space:normal;line-height:1.25}
+  .track{height:11px}
+  .rowItem{grid-template-columns:1fr;gap:7px}
+  .rowItem strong{white-space:normal;font-size:14px;line-height:1.25}
+  .rowItem em{font-size:12px}
+  .pill{font-size:12px;padding:7px 10px}
+  .quote p{font-size:14px}
+  .contactTop{display:block}
+  .contactName{font-size:15px}
+  .contactMeta{font-size:13px}
+  .badge{margin-top:6px;font-size:12px;white-space:normal;text-align:left}
+  .actionBtn{width:100%;min-height:46px;font-size:14px}
+  .tableWrap{max-height:68vh}
+  th,td{min-width:150px;padding:10px;font-size:12px}
+}
+@media(max-width:380px){.metrics{grid-template-columns:1fr}.metric{min-height:92px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap hero">
+    <div>
+      <div class="eyebrow">Validacion del proyecto</div>
+      <h1>Encuesta - Las Flores</h1>
+      <div class="sub">Necesidad de delivery + interes comercial</div>
+      <div class="status" id="status">Conectando...</div>
+    </div>
+    <button class="refresh" id="refresh" type="button">Actualizar datos</button>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <div class="controlPanel">
+      <div class="filters">
+        <div class="field">
+          <label for="localidad">Localidad</label>
+          <select class="ctrl" id="localidad"><option value="">Todas las localidades</option></select>
+        </div>
+        <div class="field">
+          <label for="perfil">Perfil</label>
+          <select class="ctrl" id="perfil">
+            <option value="">Todos los perfiles</option>
+            <option value="consumidor">Consumidores</option>
+            <option value="comercio">Comercios</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="search">Buscar</label>
+          <input class="ctrl" id="search" placeholder="Texto, localidad, comercio o WhatsApp">
+        </div>
+      </div>
+    </div>
+    <div id="app"><div class="card empty">Cargando datos...</div></div>
+  </div>
+</main>
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbzK6uL-ObkzlhxODAHNxvpfB3d6224Cjrnak2L_hhGFHlCL1U3k3VikzoWFEBJPw7p2/exec";
+const FIELDS={
+  localidad:["INDICANOS TU LOCALIDAD."],
+  esComercio:["7. ¿Sos dueño/a, encargado/a o trabajás en un comercio de tu zona?","¿Sos dueño/a, encargado/a o trabajás en un comercio de tu zona?"],
+  necesidad:["1. Cuando necesitás comprar algo en un comercio de tu zona, ¿tenés que ir personalmente?"],
+  comodidad:["2. ¿Alguna vez te hubiera resultado mucho más cómodo que te llevaran una compra a tu casa?"],
+  cosas:["3. ¿Qué cosas te gustaría poder pedir con delivery?"],
+  uso:["4. Si pudieras pedir esos productos y recibirlos en tu domicilio, ¿lo usarías?"],
+  importante:["5. ¿Qué sería lo más importante para vos?"],
+  actualmenteNo:["6.  ¿Qué producto o compra te gustaría poder pedir con delivery y actualmente no conseguís que te lleven a domicilio?","6. ¿Qué producto o compra te gustaría poder pedir con delivery y actualmente no conseguís que te lleven a domicilio?"],
+  aviso:["¿Querés que te avisemos cuando esté disponible?"],
+  nombreConsumidor:["Déjanos tu Nombre Completo para agendarte!","Dejanos tu Nombre Completo para agendarte!"],
+  waConsumidor:["Dejanos tu Whatsapp para avisarte","Déjanos tu Whatsapp para avisarte"],
+  tipoComercio:["8. ¿Qué tipo de comercio tenés o en cuál trabajás?"],
+  ofreceDelivery:["9. ¿Actualmente ofrecen delivery?"],
+  interesPlataforma:["10. Si pudieras recibir pedidos de clientes a través de una plataforma, ¿te interesaría?"],
+  importanteComercio:["11. ¿Qué sería lo más importante para tu comercio?"],
+  pruebaComercio:["12. Si el proyecto avanza, ¿te gustaría que tengamos en cuenta a tu comercio para una posible prueba?"],
+  nombreComercio:["14. Nombre del comercio"],
+  contactoComercio:["15. Nombre de la persona de contacto"],
+  waComercio:["16. WhatsApp"],
+  localidadComercio:["17. Localidad"],
+  extraComercio:["18. ¿Hay algo que te gustaría que la plataforma pudiera ofrecerle a tu comercio?"]
+};
+const LOCALIDADES=["Rodeo","Tudcum","Las Flores","Pismanta","Angualasto","Bella Vista","Villa Iglesia","Otro"];
+let rows=[],headers=[],fieldKey={};
+let showPrivate=false;
+const $=id=>document.getElementById(id);
+const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const norm=x=>String(x??"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[¿?¡!.,:;]/g,"").replace(/\s+/g," ").trim();
+const compact=x=>norm(x).replace(/^\d+\s*/,"");
+function resolveFields(){
+  fieldKey={};
+  Object.entries(FIELDS).forEach(([name,candidates])=>{
+    const found=headers.find(h=>candidates.some(c=>norm(h)===norm(c)))||
+      headers.find(h=>candidates.some(c=>compact(h)===compact(c)))||
+      headers.find(h=>candidates.some(c=>compact(h).includes(compact(c).slice(0,34))));
+    fieldKey[name]=found||candidates[0];
+  });
+}
+function val(r,name){return String(r[fieldKey[name]]??"").trim()}
+function mainLocalidad(r){return val(r,"localidadComercio")||val(r,"localidad")}
+function isYes(x){return ["si","sí"].includes(norm(x))||norm(x).startsWith("si ")}
+function profile(r){return isYes(val(r,"esComercio"))?"comercio":"consumidor"}
+function splitValues(x){return String(x||"").split(",").map(s=>s.trim()).filter(Boolean)}
+function pct(n,d){return d?Math.round(n/d*100):0}
+function countBy(data,name,{multi=false,skipBlank=true}={}){
+  const map=new Map();
+  data.forEach(r=>{
+    const values=multi?splitValues(val(r,name)):[val(r,name)];
+    values.forEach(raw=>{
+      const k=String(raw||"").trim();
+      if(skipBlank&&!k)return;
+      map.set(k,(map.get(k)||0)+1);
+    });
+  });
+  return [...map.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"es"));
+}
+function countText(values){
+  const stop=new Set("que para con los las una unos unas algo como quiero quisiera poder puedan delivery compra comprar casa domicilio zona local comercio comercios producto productos actualmente".split(" "));
+  const map=new Map();
+  values.forEach(text=>norm(text).split(" ").forEach(w=>{
+    if(w.length<4||stop.has(w))return;
+    map.set(w,(map.get(w)||0)+1);
+  }));
+  return [...map.entries()].filter(([,v])=>v>1).sort((a,b)=>b[1]-a[1]).slice(0,12);
+}
+function csvEscape(x){return `"${String(x??"").replace(/"/g,'""')}"`}
+function downloadCsv(filename,items,columns){
+  const lines=[columns.map(c=>csvEscape(c.label)).join(",")];
+  items.forEach(item=>lines.push(columns.map(c=>csvEscape(item[c.key])).join(",")));
+  const blob=new Blob(["\ufeff"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  URL.revokeObjectURL(a.href);
+  a.remove();
+}
+function verdictText({consumers,shops,usePositive,needStrong,comfortStrong,shopInterested,trialYes}){
+  const demand=pct(usePositive,consumers.length);
+  const need=pct(needStrong,consumers.length);
+  const comfort=pct(comfortStrong,consumers.length);
+  const commerce=pct(shopInterested.length,shops.length);
+  const pilot=pct(trialYes.length,shops.length);
+  const label=demand>=60&&need>=50?"Senal positiva de demanda":demand>=35?"Senal mixta, conviene seguir midiendo":"Senal debil por ahora";
+  const commerceText=shops.length?`${commerce}% de comercios muestra interes y ${pilot}% quiere contacto para prueba.`:"Todavia no hay respuestas comerciales; el lado oferta queda pendiente de validar.";
+  return {
+    label,
+    text:`${demand}% de consumidores usaria o probablemente usaria el servicio. ${need}% declara tener que ir personalmente con frecuencia y ${comfort}% muchas veces hubiera preferido recibir la compra en casa. ${commerceText}`
+  };
+}
+function summaryBlock(stats){
+  const verdict=verdictText(stats);
+  return `<section class="card summaryCard" id="resumen">
+    <div>
+      <div class="label">Resumen ejecutivo</div>
+      <div class="verdict">${esc(verdict.label)}</div>
+      <div class="summaryText">${esc(verdict.text)}</div>
+    </div>
+  </section>`;
+}
+function drawerBlock(counts){
+  return `<button class="drawerFab" id="openDrawer" type="button">Menu</button>
+  <div class="drawerOverlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer" aria-label="Menu de acciones">
+    <div class="drawerHead">
+      <div><div class="drawerTitle">Acciones</div><div class="small">${counts.consumerContacts} consumidores · ${counts.shopContacts} comercios</div></div>
+      <button class="drawerClose" id="closeDrawer" type="button">×</button>
+    </div>
+    <div class="drawerBody">
+      <div class="drawerBlock">
+        <div class="drawerBlockTitle">Herramientas</div>
+        <div class="actions">
+          <button class="actionBtn primary" type="button" id="copySummary">Copiar resumen</button>
+          <button class="actionBtn" type="button" id="exportConsumers">CSV consumidores</button>
+          <button class="actionBtn" type="button" id="exportShops">CSV comercios</button>
+          <button class="actionBtn" type="button" id="togglePrivate">${showPrivate?"Ocultar WhatsApp":"Mostrar WhatsApp"}</button>
+        </div>
+      </div>
+      <div class="drawerBlock">
+        <div class="drawerBlockTitle">Ir a seccion</div>
+        <nav class="quickNav">
+          <a href="#resumen">Resumen</a>
+          <a href="#demanda">Demanda</a>
+          <a href="#comercios">Comercios</a>
+          <a href="#zona">Zona</a>
+          <a href="#textos">Textos</a>
+          <a href="#contactos">Contactos</a>
+          <a href="#tabla">Tabla</a>
+        </nav>
+      </div>
+    </div>
+  </aside>`;
+}
+function barList(title,data,total,opts={}){
+  const color=opts.color||"";
+  const empty=opts.empty||"Todavia no hay datos para esta seccion.";
+  return `<div class="card">
+    <div class="sectionHead"><div><div class="sectionTitle">${esc(title)}</div>${opts.hint?`<div class="sectionHint">${esc(opts.hint)}</div>`:""}</div>${opts.badge||""}</div>
+    ${data.length?data.slice(0,opts.limit||10).map(([k,v])=>`<div class="bar"><div class="barTop"><span title="${esc(k)}">${esc(k)}</span><b>${v} <span class="small">${pct(v,total)}%</span></b></div><div class="track"><div class="fill ${color}" style="width:${Math.max(3,pct(v,total))}%"></div></div></div>`).join(""):`<div class="empty">${esc(empty)}</div>`}
+  </div>`;
+}
+function distribution(title,data,total,positiveLabels=[]){
+  const positive=new Set(positiveLabels.map(norm));
+  return `<div class="card"><div class="sectionHead"><div><div class="sectionTitle">${esc(title)}</div><div class="sectionHint">${total} respuestas consideradas</div></div></div>
+    <div class="splitRows">${data.length?data.map(([k,v])=>`<div class="rowItem"><div><strong>${esc(k)}</strong><em>${positive.has(norm(k))?"Senal positiva":"Distribucion"}</em></div><span class="badge ${positive.has(norm(k))?"ok":"info"}">${v} - ${pct(v,total)}%</span></div>`).join(""):`<div class="empty">Todavia no hay respuestas.</div>`}</div>
+  </div>`;
+}
+function quoteSection(title,items,keywords){
+  return `<div class="card"><div class="sectionHead"><div><div class="sectionTitle">${esc(title)}</div><div class="sectionHint">${items.length} respuestas abiertas</div></div></div>
+    ${keywords.length?`<div class="pillList">${keywords.map(([k,v])=>`<span class="pill focus">${esc(k)} · ${v}</span>`).join("")}</div>`:""}
+    <div class="quoteGrid" style="margin-top:${keywords.length?10:0}px">${items.length?items.slice(0,12).map(item=>`<div class="quote"><p>${esc(item.text)}</p><small>${esc(item.localidad||"Sin localidad")}</small></div>`).join(""):`<div class="empty">Aun no hay textos para mostrar.</div>`}</div>
+  </div>`;
+}
+function contactCard(c,type){
+  const phone=c.whatsapp?` · <span class="privateText phoneValue">${esc(showPrivate?c.whatsapp:"••••••••")}</span>`:"";
+  return `<div class="contact"><div class="contactTop"><div><div class="contactName">${esc(c.title||"Sin nombre")}</div><div class="contactMeta">${esc(c.person||"")}${phone}</div><div class="contactMeta">${esc(c.localidad||"Sin localidad")}</div></div><span class="badge ${type==="shop"?"warn":"ok"}">${esc(c.interes)}</span></div></div>`;
+}
+function bindActions(payload){
+  const copy=$("copySummary"), expConsumers=$("exportConsumers"), expShops=$("exportShops"), toggle=$("togglePrivate");
+  const drawer=$("drawer"), overlay=$("drawerOverlay"), open=$("openDrawer"), close=$("closeDrawer");
+  const closeMenu=()=>{drawer&&drawer.classList.remove("open");overlay&&overlay.classList.remove("open")};
+  if(open)open.onclick=()=>{drawer&&drawer.classList.add("open");overlay&&overlay.classList.add("open")};
+  if(close)close.onclick=closeMenu;
+  if(overlay)overlay.onclick=closeMenu;
+  document.querySelectorAll(".quickNav a").forEach(a=>a.addEventListener("click",()=>{
+    const target=document.querySelector(a.getAttribute("href"));
+    if(target&&target.tagName==="DETAILS")target.open=true;
+    closeMenu();
+  }));
+  if(copy)copy.onclick=()=>{
+    const verdict=verdictText(payload.stats);
+    const text=`${verdict.label}\n${verdict.text}`;
+    if(navigator.clipboard)navigator.clipboard.writeText(text);
+    copy.textContent="Resumen copiado";
+    setTimeout(()=>copy.textContent="Copiar resumen",1300);
+  };
+  if(expConsumers)expConsumers.onclick=()=>downloadCsv("contactos-consumidores.csv",payload.consumerContacts,[
+    {key:"title",label:"Nombre"},{key:"whatsapp",label:"WhatsApp"},{key:"localidad",label:"Localidad"},{key:"interes",label:"Interes"}
+  ]);
+  if(expShops)expShops.onclick=()=>downloadCsv("comercios-potenciales.csv",payload.shopContacts,[
+    {key:"title",label:"Comercio"},{key:"person",label:"Persona"},{key:"whatsapp",label:"WhatsApp"},{key:"localidad",label:"Localidad"},{key:"interes",label:"Interes"}
+  ]);
+  if(toggle)toggle.onclick=()=>{showPrivate=!showPrivate;render()};
+}
+function makeDetail(title,nodes,id){
+  const detail=document.createElement("details");
+  detail.className="detailGroup";
+  if(id)detail.id=id;
+  const summary=document.createElement("summary");
+  summary.textContent=title;
+  const inner=document.createElement("div");
+  inner.className="detailInner";
+  detail.append(summary,inner);
+  nodes[0].before(detail);
+  nodes.forEach(node=>{node.removeAttribute("id");inner.appendChild(node)});
+}
+function compactSections(){
+  const dashboard=document.querySelector("#app .dashboard");
+  if(!dashboard)return;
+  const sections=[...dashboard.children].filter(el=>el.matches("section"));
+  if(sections.length<12)return;
+  makeDetail("Detalle de consumidores",[sections[3],sections[4]]);
+  makeDetail("Detalle comercial",[sections[6],sections[7]]);
+  makeDetail("Localidades",[sections[8]],"zona");
+  makeDetail("Respuestas abiertas",[sections[9]],"textos");
+  makeDetail("Contactos",[sections[10]],"contactos");
+  makeDetail("Respuestas originales",[sections[11]],"tabla");
+}
+function render(){
+  const loc=$("localidad").value, prof=$("perfil").value, query=norm($("search").value);
+  const filtered=rows.filter(r=>{
+    const localOk=!loc||norm(mainLocalidad(r))===norm(loc)||norm(val(r,"localidad"))===norm(loc);
+    const profileOk=!prof||profile(r)===prof;
+    const searchOk=!query||Object.values(r).some(v=>norm(v).includes(query));
+    return localOk&&profileOk&&searchOk;
+  });
+  const consumers=filtered.filter(r=>profile(r)==="consumidor");
+  const shops=filtered.filter(r=>profile(r)==="comercio");
+  const total=filtered.length;
+  const consumerNews=consumers.filter(r=>norm(val(r,"aviso")).startsWith("si"));
+  const shopInterested=shops.filter(r=>["si me interesaria mucho","si quisiera conocer mas"].includes(norm(val(r,"interesPlataforma"))));
+  const strongShop=shops.filter(r=>norm(val(r,"interesPlataforma"))==="si me interesaria mucho");
+  const trialYes=shops.filter(r=>norm(val(r,"pruebaComercio"))==="si quiero que me contacten");
+  const trialMaybe=shops.filter(r=>norm(val(r,"pruebaComercio"))==="me gustaria conocer mas antes de decidir");
+  const needStrong=consumers.filter(r=>["casi siempre","muchas veces"].includes(norm(val(r,"necesidad")))).length;
+  const comfortStrong=consumers.filter(r=>norm(val(r,"comodidad"))==="si muchas veces").length;
+  const usePositive=consumers.filter(r=>["si frecuentemente","si algunas veces","probablemente"].includes(norm(val(r,"uso")))).length;
+  const places=countBy(filtered,"localidad",{skipBlank:true});
+  const lasFlores=filtered.filter(r=>norm(mainLocalidad(r))==="las flores"||norm(val(r,"localidad"))==="las flores").length;
+  const consumerTexts=consumers.map(r=>({text:val(r,"actualmenteNo"),localidad:mainLocalidad(r)})).filter(x=>x.text);
+  const shopTexts=shops.map(r=>({text:val(r,"extraComercio"),localidad:mainLocalidad(r)})).filter(x=>x.text);
+  const consumerContacts=consumerNews.map(r=>({title:val(r,"nombreConsumidor"),person:"Consumidor",whatsapp:val(r,"waConsumidor"),localidad:mainLocalidad(r),interes:"Quiere novedades"}));
+  const shopContacts=shops.filter(r=>norm(val(r,"pruebaComercio"))==="si quiero que me contacten"||norm(val(r,"pruebaComercio"))==="me gustaria conocer mas antes de decidir"||norm(val(r,"interesPlataforma")).startsWith("si")).map(r=>({title:val(r,"nombreComercio")||"Comercio sin nombre",person:val(r,"contactoComercio"),whatsapp:val(r,"waComercio"),localidad:mainLocalidad(r),interes:val(r,"pruebaComercio")||val(r,"interesPlataforma")}));
+  const tableHeaders=headers.length?headers:Object.values(fieldKey);
+  const stats={consumers,shops,usePositive,needStrong,comfortStrong,shopInterested,trialYes};
+  $("app").innerHTML=`
+  <div class="dashboard">
+    ${summaryBlock(stats)}
+    <section class="metrics">
+      <div class="card metric"><div><div class="label">Respuestas</div><div class="big">${total}</div><div class="small">muestra filtrada</div></div><span class="badge info">${rows.length} total</span></div>
+      <div class="card metric"><div><div class="label">Consumidores</div><div class="big">${consumers.length}</div><div class="small">${pct(consumers.length,total)}% de respuestas</div></div><span class="badge ok">${pct(usePositive,consumers.length)}% uso</span></div>
+      <div class="card metric"><div><div class="label">Comercios</div><div class="big">${shops.length}</div><div class="small">${strongShop.length} con interes fuerte</div></div><span class="badge warn">${shopInterested.length} interesados</span></div>
+      <div class="card metric"><div><div class="label">Interesados</div><div class="big">${consumerNews.length}</div><div class="small">personas quieren novedades</div></div><span class="badge ok">${shopContacts.length} comercios</span></div>
+    </section>
+
+    <section class="gridDemand" id="demanda">
+      <div class="card">
+        <div class="sectionHead"><div><div class="sectionTitle">¿Hay demanda real?</div><div class="sectionHint">Lectura rapida de necesidad, comodidad e intencion de uso.</div></div><span class="badge ${pct(usePositive,consumers.length)>=60?"ok":pct(usePositive,consumers.length)>=35?"warn":"bad"}">${pct(usePositive,consumers.length)}% intencion positiva</span></div>
+        <div class="signals">
+          <div class="signal"><b>${pct(needStrong,consumers.length)}%</b><span>va personalmente casi siempre o muchas veces</span></div>
+          <div class="signal"><b>${pct(comfortStrong,consumers.length)}%</b><span>muchas veces hubiera preferido recibir en casa</span></div>
+          <div class="signal"><b>${pct(usePositive,consumers.length)}%</b><span>usaria o probablemente usaria delivery</span></div>
+        </div>
+      </div>
+      ${barList("Categorias mas demandadas",countBy(consumers,"cosas",{multi:true}),Math.max(consumers.length,1),{hint:"Pregunta de seleccion multiple.",color:"ok",empty:"Aun no hay categorias elegidas."})}
+    </section>
+
+    <section class="grid2">
+      ${distribution("Intencion de utilizar delivery",countBy(consumers,"uso"),consumers.length,["Sí, frecuentemente","Sí, algunas veces","Probablemente"])}
+      ${distribution("Necesidad y comodidad",countBy(consumers,"necesidad"),consumers.length,["Casi siempre","Muchas veces"])}
+    </section>
+
+    <section class="grid2">
+      ${barList("Factores importantes para consumidores",countBy(consumers,"importante",{multi:true}),Math.max(consumers.length,1),{hint:"Ranking de necesidades: precio, envio, total, disponibilidad, seguimiento, rapidez y pago.",color:"ok"})}
+      ${distribution("Comodidad de recibir compras",countBy(consumers,"comodidad"),consumers.length,["Sí, muchas veces","Sí, algunas veces"])}
+    </section>
+
+    <section class="gridCommerce" id="comercios">
+      <div class="card">
+        <div class="sectionHead"><div><div class="sectionTitle">¿Hay comercios dispuestos a participar?</div><div class="sectionHint">Validacion del lado oferta del mercado.</div></div><span class="badge ${shops.length?"warn":"info"}">${shops.length} comercios</span></div>
+        <div class="signals">
+          <div class="signal"><b>${shopInterested.length}</b><span>interesados en recibir pedidos por plataforma</span></div>
+          <div class="signal"><b>${trialYes.length}</b><span>quieren que los contacten para una prueba</span></div>
+          <div class="signal"><b>${trialMaybe.length}</b><span>quieren conocer mas antes de decidir</span></div>
+        </div>
+        <div class="note">Si todavia no hay respuestas comerciales, los indicadores quedan en cero sin tratarlo como error.</div>
+      </div>
+      ${distribution("Estado actual del delivery en comercios",countBy(shops,"ofreceDelivery"),shops.length,["Sí, tenemos nuestro propio delivery","Sí, pero lo hacemos de manera ocasional","Estamos pensando en ofrecerlo"])}
+    </section>
+
+    <section class="grid2" id="zona">
+      ${distribution("Interes de los comercios",countBy(shops,"interesPlataforma"),shops.length,["Sí, me interesaría mucho","Sí, quisiera conocer más"])}
+      ${distribution("Comercios potenciales para primera prueba",countBy(shops,"pruebaComercio"),shops.length,["Sí, quiero que me contacten","Me gustaría conocer más antes de decidir"])}
+    </section>
+
+    <section class="grid2" id="textos">
+      ${barList("Tipos de comercio",countBy(shops,"tipoComercio"),Math.max(shops.length,1),{hint:"Ranking de comercios que aparecen en la encuesta.",color:"warn"})}
+      ${barList("¿Que esperan los comercios de la plataforma?",countBy(shops,"importanteComercio",{multi:true}),Math.max(shops.length,1),{hint:"Necesidades elegidas por comercios.",color:"warn"})}
+    </section>
+
+    <section class="grid2">
+      ${barList("¿Donde estamos encontrando interes?",places,Math.max(total,1),{hint:`Las Flores: ${lasFlores} respuestas filtradas.`,badge:`<span class="badge info">Las Flores · ${lasFlores}</span>`})}
+      <div class="card"><div class="sectionHead"><div><div class="sectionTitle">Localidades relevadas</div><div class="sectionHint">El filtro mantiene todas las zonas reutilizables.</div></div></div><div class="pillList">${LOCALIDADES.map(x=>`<span class="pill ${norm(x)==="las flores"?"focus":""}">${esc(x)} · ${filtered.filter(r=>norm(mainLocalidad(r))===norm(x)||norm(val(r,"localidad"))===norm(x)).length}</span>`).join("")}</div></div>
+    </section>
+
+    <section class="grid2">
+      ${quoteSection("Lo que la gente esta pidiendo",consumerTexts,countText(consumerTexts.map(x=>x.text)))}
+      ${quoteSection("Lo que los comercios quieren",shopTexts,countText(shopTexts.map(x=>x.text)))}
+    </section>
+
+    <section class="contacts ${showPrivate?"":"locked"}" id="contactos">
+      <div class="card"><div class="sectionHead"><div><div class="sectionTitle">Personas para contactar</div><div class="sectionHint">Consumidores que pidieron recibir informacion.</div></div><span class="badge ok">${consumerContacts.length}</span></div><div class="contactList">${consumerContacts.length?consumerContacts.map(c=>contactCard(c,"consumer")).join(""):`<div class="empty">No hay consumidores para contactar con estos filtros.</div>`}</div></div>
+      <div class="card"><div class="sectionHead"><div><div class="sectionTitle">Comercios potenciales</div><div class="sectionHint">Comercios interesados, con dudas o disponibles para piloto.</div></div><span class="badge warn">${shopContacts.length}</span></div><div class="contactList">${shopContacts.length?shopContacts.map(c=>contactCard(c,"shop")).join(""):`<div class="empty">No hay comercios potenciales con estos filtros.</div>`}</div></div>
+    </section>
+
+    <section class="card" id="tabla">
+      <div class="sectionHead"><div><div class="sectionTitle">Respuestas originales</div><div class="sectionHint">Tabla secundaria con scroll horizontal y vertical. Muestra las respuestas mas recientes primero.</div></div><span class="badge info">${filtered.length} filas</span></div>
+      <div class="tableWrap"><table><thead><tr>${tableHeaders.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${filtered.slice().reverse().map(r=>`<tr>${tableHeaders.map(h=>`<td>${esc(r[h]||"")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      ${filtered.length?"":`<div class="empty">No hay respuestas con los filtros actuales.</div>`}
+    </section>
+  </div>`;
+  $("app").insertAdjacentHTML("beforeend",drawerBlock({consumerContacts:consumerContacts.length,shopContacts:shopContacts.length}));
+  compactSections();
+  bindActions({stats,consumerContacts,shopContacts});
+}
+function load(){
+  $("status").textContent="Actualizando datos...";
+  const cb="dashboard_"+Date.now();
+  window[cb]=data=>{
+    try{
+      rows=Array.isArray(data.rows)?data.rows:[];
+      headers=Array.isArray(data.headers)?data.headers:[];
+      resolveFields();
+      const values=new Set(LOCALIDADES);
+      rows.forEach(r=>{if(val(r,"localidad"))values.add(val(r,"localidad"));if(val(r,"localidadComercio"))values.add(val(r,"localidadComercio"))});
+      $("localidad").innerHTML='<option value="">Todas las localidades</option>'+[...values].filter(Boolean).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+      $("status").textContent=`Conectado · ${rows.length} respuestas${data.updatedAt?" · actualizado "+new Date(data.updatedAt).toLocaleString("es-AR"):""}`;
+      render();
+    }catch(e){
+      $("status").textContent="Error procesando datos: "+e.message;
+      $("app").innerHTML=`<div class="card empty">No se pudo interpretar la respuesta del endpoint.</div>`;
+    }
+    delete window[cb];
+  };
+  const s=document.createElement("script");
+  s.src=API_URL+"?callback="+cb+"&t="+Date.now();
+  s.onerror=()=>{$("status").textContent="No se pudo conectar al endpoint";delete window[cb]};
+  document.body.appendChild(s);
+}
+["localidad","perfil","search"].forEach(id=>$(id).addEventListener("input",render));
+$("refresh").addEventListener("click",load);
+load();
+</script>
+</body>
+</html>
