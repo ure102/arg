@@ -23,8 +23,14 @@ button{cursor:pointer}
 h1{font-size:27px;line-height:1.05;margin:4px 0 5px;letter-spacing:0;font-weight:850}
 .sub{color:#d5dbeb;font-size:14px}
 .status{margin-top:7px;color:#b9c3d6;font-size:11px}
+.liveLine{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.livePill{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#e9eefb;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:850}
+.heroActions{display:flex;align-items:center;gap:9px}
 .refresh{border:1px solid rgba(255,255,255,.16);border-radius:10px;background:#fff;color:#1f2a44;padding:10px 14px;font-weight:800;min-height:44px}
 .refresh:hover{background:#f4f7ff}
+.bellBtn{position:relative;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.1);color:#fff;border-radius:12px;width:46px;height:44px;font-size:20px;font-weight:900}
+.bellBadge{position:absolute;right:-5px;top:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#ef4444;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:900;border:2px solid #111827}
+.bellBadge.empty{display:none}
 main{padding:16px 0 40px}
 .controlPanel{position:sticky;top:0;z-index:5;background:rgba(245,247,251,.96);backdrop-filter:blur(10px);padding:8px 0 4px;margin:-8px 0 8px}
 .filters{display:grid;grid-template-columns:190px 160px minmax(240px,1fr);gap:10px;margin-bottom:10px}
@@ -42,6 +48,8 @@ main{padding:16px 0 40px}
 .drawerFab{position:fixed;right:14px;bottom:14px;z-index:20;border:0;background:var(--primary);color:#fff;border-radius:999px;padding:13px 16px;font-weight:900;box-shadow:0 12px 30px rgba(79,70,229,.28)}
 .drawerOverlay{position:fixed;inset:0;background:rgba(17,24,39,.34);z-index:30;opacity:0;pointer-events:none;transition:.18s}
 .drawer{position:fixed;top:0;right:0;height:100dvh;width:min(360px,92vw);z-index:31;background:#f7f9fd;border-left:1px solid var(--line);box-shadow:-18px 0 44px rgba(15,23,42,.18);transform:translateX(105%);transition:.2s;display:grid;grid-template-rows:auto 1fr}
+.drawer.notifyDrawer{left:0;right:auto;border-left:0;border-right:1px solid var(--line);box-shadow:18px 0 44px rgba(15,23,42,.18);transform:translateX(-105%)}
+.drawer.notifyDrawer.open{transform:translateX(0)}
 .drawer.open{transform:translateX(0)}
 .drawerOverlay.open{opacity:1;pointer-events:auto}
 .drawerHead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--line);background:#fff}
@@ -50,6 +58,15 @@ main{padding:16px 0 40px}
 .drawerBody{padding:14px;overflow:auto;display:grid;gap:16px;align-content:start}
 .drawerBlock{display:grid;gap:8px}
 .drawerBlockTitle{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}
+.toastStack{position:fixed;right:14px;top:86px;z-index:40;display:grid;gap:9px;width:min(360px,calc(100vw - 28px));pointer-events:none}
+.toast{pointer-events:auto;background:#fff;border:1px solid var(--line);border-left:4px solid var(--primary);border-radius:12px;padding:11px 12px;box-shadow:0 16px 38px rgba(15,23,42,.16);transition:.18s}
+.toast.hide{opacity:0;transform:translateX(28px)}
+.toastTitle{font-weight:900;font-size:13px}
+.toastText{color:#4b5565;font-size:12px;margin-top:3px}
+.notifList{display:grid;gap:8px}
+.notifItem{border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px}
+.notifItem.unread{border-color:#c7d2fe;background:#f8faff}
+.notifTime{color:var(--muted);font-size:11px;margin-top:5px}
 .actions{display:grid;gap:8px}
 .actionBtn{border:1px solid var(--line);background:#fff;color:#253044;border-radius:10px;padding:9px 11px;font-size:12px;font-weight:850}
 .actionBtn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
@@ -115,8 +132,13 @@ th{position:sticky;top:0;background:#f9fafc;color:#596275;z-index:1;font-size:10
 @media(max-width:720px){
   body{font-size:15px;line-height:1.52}
   .wrap{padding:0 12px}
-  .hero{align-items:flex-start;flex-direction:column;padding:18px 0}
+  .hero{align-items:flex-start;flex-direction:column;padding:18px 0;gap:13px}
+  .heroActions{width:100%;display:grid;grid-template-columns:1fr 50px;gap:9px}
   .refresh{width:100%;font-size:15px}
+  .bellBtn{width:50px}
+  .liveLine{gap:6px}
+  .livePill{font-size:12px}
+  .toastStack{top:12px;right:10px;width:calc(100vw - 20px)}
   h1{font-size:26px}
   .sub{font-size:15px}
   .status{font-size:12px}
@@ -171,10 +193,18 @@ th{position:sticky;top:0;background:#f9fafc;color:#596275;z-index:1;font-size:10
       <h1>Encuesta - Las Flores</h1>
       <div class="sub">Necesidad de delivery + interes comercial</div>
       <div class="status" id="status">Conectando...</div>
+      <div class="liveLine">
+        <span class="livePill">Autoactualizacion: <b id="countdown">60s</b></span>
+        <span class="livePill" id="lastCheck">Esperando datos</span>
+      </div>
     </div>
-    <button class="refresh" id="refresh" type="button">Actualizar datos</button>
+    <div class="heroActions">
+      <button class="refresh" id="refresh" type="button">Actualizar datos</button>
+      <button class="bellBtn" id="openNotifications" type="button" aria-label="Notificaciones">🔔<span class="bellBadge empty" id="notificationBadge">0</span></button>
+    </div>
   </div>
 </header>
+<div class="toastStack" id="toastStack" aria-live="polite"></div>
 <main>
   <div class="wrap">
     <div class="controlPanel">
@@ -228,6 +258,7 @@ const FIELDS={
 const LOCALIDADES=["Rodeo","Tudcum","Las Flores","Pismanta","Angualasto","Bella Vista","Villa Iglesia","Otro"];
 let rows=[],headers=[],fieldKey={};
 let showPrivate=false;
+let firstLoad=true,lastRowCount=0,secondsToRefresh=60,refreshTimer=null,isLoading=false,notifications=[],unreadNotifications=0;
 const $=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 const norm=x=>String(x??"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[¿?¡!.,:;]/g,"").replace(/\s+/g," ").trim();
@@ -338,6 +369,18 @@ function drawerBlock(counts){
     </div>
   </aside>`;
 }
+function notificationDrawerBlock(){
+  return `<div class="drawerOverlay" id="notificationOverlay"></div>
+  <aside class="drawer notifyDrawer" id="notificationDrawer" aria-label="Notificaciones">
+    <div class="drawerHead">
+      <div><div class="drawerTitle">Notificaciones</div><div class="small" id="notificationCountText">${notifications.length} eventos recientes</div></div>
+      <button class="drawerClose" id="closeNotifications" type="button">×</button>
+    </div>
+    <div class="drawerBody">
+      <div class="notifList" id="notificationList"></div>
+    </div>
+  </aside>`;
+}
 function barList(title,data,total,opts={}){
   const color=opts.color||"";
   const empty=opts.empty||"Todavia no hay datos para esta seccion.";
@@ -362,13 +405,89 @@ function contactCard(c,type){
   const phone=c.whatsapp?` · <span class="privateText phoneValue">${esc(showPrivate?c.whatsapp:"••••••••")}</span>`:"";
   return `<div class="contact"><div class="contactTop"><div><div class="contactName">${esc(c.title||"Sin nombre")}</div><div class="contactMeta">${esc(c.person||"")}${phone}</div><div class="contactMeta">${esc(c.localidad||"Sin localidad")}</div></div><span class="badge ${type==="shop"?"warn":"ok"}">${esc(c.interes)}</span></div></div>`;
 }
+function responseName(r){
+  const name=val(r,"contactoComercio")||val(r,"nombreComercio")||val(r,"nombreConsumidor");
+  return name?`de ${name}`:"anónima";
+}
+function notificationText(r){
+  return profile(r)==="comercio"?`1 nuevo comercio ${responseName(r)}`:`1 nueva respuesta ${responseName(r)}`;
+}
+function updateNotificationBadge(){
+  const badge=$("notificationBadge");
+  if(!badge)return;
+  badge.textContent=unreadNotifications;
+  badge.classList.toggle("empty",unreadNotifications===0);
+}
+function renderNotifications(){
+  const list=$("notificationList"), count=$("notificationCountText");
+  if(count)count.textContent=`${notifications.length} eventos recientes`;
+  if(!list)return;
+  list.innerHTML=notifications.length?notifications.map(n=>`<div class="notifItem ${n.read?"":"unread"}"><div class="toastTitle">${esc(n.title)}</div><div class="toastText">${esc(n.detail)}</div><div class="notifTime">${esc(n.time)}</div></div>`).join(""):`<div class="empty">Todavia no hay notificaciones nuevas.</div>`;
+}
+function showToast(notification){
+  const stack=$("toastStack");
+  if(!stack)return;
+  const el=document.createElement("div");
+  el.className="toast";
+  el.innerHTML=`<div class="toastTitle">${esc(notification.title)}</div><div class="toastText">${esc(notification.detail)}</div>`;
+  let startX=0;
+  el.addEventListener("pointerdown",e=>startX=e.clientX);
+  el.addEventListener("pointerup",e=>{if(Math.abs(e.clientX-startX)>70)removeToast(el)});
+  el.addEventListener("click",()=>removeToast(el));
+  stack.prepend(el);
+  setTimeout(()=>removeToast(el),20000);
+}
+function removeToast(el){
+  if(!el||el.classList.contains("hide"))return;
+  el.classList.add("hide");
+  setTimeout(()=>el.remove(),220);
+}
+function addNotifications(newRows){
+  newRows.forEach(r=>{
+    const notification={
+      title:notificationText(r),
+      detail:mainLocalidad(r)||"Sin localidad indicada",
+      time:new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}),
+      read:false
+    };
+    notifications.unshift(notification);
+    unreadNotifications++;
+    showToast(notification);
+  });
+  notifications=notifications.slice(0,30);
+  updateNotificationBadge();
+  renderNotifications();
+}
+function seedRecentNotifications(sourceRows){
+  notifications=sourceRows.slice(-10).reverse().map(r=>({
+    title:notificationText(r),
+    detail:mainLocalidad(r)||"Sin localidad indicada",
+    time:"Respuesta existente",
+    read:true
+  }));
+  unreadNotifications=0;
+  updateNotificationBadge();
+  renderNotifications();
+}
 function bindActions(payload){
   const share=$("shareSurvey"), copy=$("copySummary"), expConsumers=$("exportConsumers"), expShops=$("exportShops"), toggle=$("togglePrivate");
   const drawer=$("drawer"), overlay=$("drawerOverlay"), open=$("openDrawer"), close=$("closeDrawer");
+  const notificationDrawer=$("notificationDrawer"), notificationOverlay=$("notificationOverlay"), openNotifications=$("openNotifications"), closeNotifications=$("closeNotifications");
   const closeMenu=()=>{drawer&&drawer.classList.remove("open");overlay&&overlay.classList.remove("open")};
+  const closeNotificationPanel=()=>{notificationDrawer&&notificationDrawer.classList.remove("open");notificationOverlay&&notificationOverlay.classList.remove("open")};
   if(open)open.onclick=()=>{drawer&&drawer.classList.add("open");overlay&&overlay.classList.add("open")};
   if(close)close.onclick=closeMenu;
   if(overlay)overlay.onclick=closeMenu;
+  if(openNotifications)openNotifications.onclick=()=>{
+    notificationDrawer&&notificationDrawer.classList.add("open");
+    notificationOverlay&&notificationOverlay.classList.add("open");
+    notifications.forEach(n=>n.read=true);
+    unreadNotifications=0;
+    updateNotificationBadge();
+    renderNotifications();
+  };
+  if(closeNotifications)closeNotifications.onclick=closeNotificationPanel;
+  if(notificationOverlay)notificationOverlay.onclick=closeNotificationPanel;
   if(share)share.onclick=shareSurveyWhatsApp;
   document.querySelectorAll(".quickNav a").forEach(a=>a.addEventListener("click",()=>{
     const target=document.querySelector(a.getAttribute("href"));
@@ -533,37 +652,65 @@ function render(){
       ${filtered.length?"":`<div class="empty">No hay respuestas con los filtros actuales.</div>`}
     </section>
   </div>`;
-  $("app").insertAdjacentHTML("beforeend",drawerBlock({consumerContacts:consumerContacts.length,shopContacts:shopContacts.length}));
+  $("app").insertAdjacentHTML("beforeend",drawerBlock({consumerContacts:consumerContacts.length,shopContacts:shopContacts.length})+notificationDrawerBlock());
   compactSections();
   bindActions({stats,consumerContacts,shopContacts});
+  updateNotificationBadge();
+  renderNotifications();
 }
-function load(){
+function resetCountdown(){
+  secondsToRefresh=60;
+  if($("countdown"))$("countdown").textContent=secondsToRefresh+"s";
+}
+function startAutoRefresh(){
+  if(refreshTimer)return;
+  refreshTimer=setInterval(()=>{
+    secondsToRefresh--;
+    if($("countdown"))$("countdown").textContent=Math.max(secondsToRefresh,0)+"s";
+    if(secondsToRefresh<=0)load(true);
+  },1000);
+}
+function load(isAuto=false){
+  if(isLoading)return;
+  isLoading=true;
   $("status").textContent="Actualizando datos...";
   const cb="dashboard_"+Date.now();
   window[cb]=data=>{
     try{
-      rows=Array.isArray(data.rows)?data.rows:[];
+      const previousCount=lastRowCount;
+      const nextRows=Array.isArray(data.rows)?data.rows:[];
+      rows=nextRows;
       headers=Array.isArray(data.headers)?data.headers:[];
       resolveFields();
+      if(firstLoad)seedRecentNotifications(rows);
+      if(!firstLoad&&rows.length>previousCount)addNotifications(rows.slice(previousCount));
+      lastRowCount=rows.length;
+      firstLoad=false;
       const values=new Set(LOCALIDADES);
+      const selectedLocalidad=$("localidad").value;
       rows.forEach(r=>{if(val(r,"localidad"))values.add(val(r,"localidad"));if(val(r,"localidadComercio"))values.add(val(r,"localidadComercio"))});
       $("localidad").innerHTML='<option value="">Todas las localidades</option>'+[...values].filter(Boolean).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+      $("localidad").value=selectedLocalidad;
       $("status").textContent=`Conectado · ${rows.length} respuestas${data.updatedAt?" · actualizado "+new Date(data.updatedAt).toLocaleString("es-AR"):""}`;
+      if($("lastCheck"))$("lastCheck").textContent=`Ultimo chequeo: ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
+      resetCountdown();
       render();
     }catch(e){
       $("status").textContent="Error procesando datos: "+e.message;
       $("app").innerHTML=`<div class="card empty">No se pudo interpretar la respuesta del endpoint.</div>`;
     }
+    isLoading=false;
     delete window[cb];
   };
   const s=document.createElement("script");
   s.src=API_URL+"?callback="+cb+"&t="+Date.now();
-  s.onerror=()=>{$("status").textContent="No se pudo conectar al endpoint";delete window[cb]};
+  s.onerror=()=>{$("status").textContent="No se pudo conectar al endpoint";resetCountdown();isLoading=false;delete window[cb]};
   document.body.appendChild(s);
 }
 ["localidad","perfil","search"].forEach(id=>$(id).addEventListener("input",render));
-$("refresh").addEventListener("click",load);
+$("refresh").addEventListener("click",()=>load(false));
 load();
+startAutoRefresh();
 </script>
 </body>
 </html>
