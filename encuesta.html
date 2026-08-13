@@ -316,6 +316,7 @@ function drawerBlock(counts){
       <div class="drawerBlock">
         <div class="drawerBlockTitle">Herramientas</div>
         <div class="actions">
+          <button class="actionBtn primary" type="button" id="shareSurvey">Compartir encuesta por WhatsApp</button>
           <button class="actionBtn primary" type="button" id="copySummary">Copiar resumen</button>
           <button class="actionBtn" type="button" id="exportConsumers">CSV consumidores</button>
           <button class="actionBtn" type="button" id="exportShops">CSV comercios</button>
@@ -362,12 +363,13 @@ function contactCard(c,type){
   return `<div class="contact"><div class="contactTop"><div><div class="contactName">${esc(c.title||"Sin nombre")}</div><div class="contactMeta">${esc(c.person||"")}${phone}</div><div class="contactMeta">${esc(c.localidad||"Sin localidad")}</div></div><span class="badge ${type==="shop"?"warn":"ok"}">${esc(c.interes)}</span></div></div>`;
 }
 function bindActions(payload){
-  const copy=$("copySummary"), expConsumers=$("exportConsumers"), expShops=$("exportShops"), toggle=$("togglePrivate");
+  const share=$("shareSurvey"), copy=$("copySummary"), expConsumers=$("exportConsumers"), expShops=$("exportShops"), toggle=$("togglePrivate");
   const drawer=$("drawer"), overlay=$("drawerOverlay"), open=$("openDrawer"), close=$("closeDrawer");
   const closeMenu=()=>{drawer&&drawer.classList.remove("open");overlay&&overlay.classList.remove("open")};
   if(open)open.onclick=()=>{drawer&&drawer.classList.add("open");overlay&&overlay.classList.add("open")};
   if(close)close.onclick=closeMenu;
   if(overlay)overlay.onclick=closeMenu;
+  if(share)share.onclick=shareSurveyWhatsApp;
   document.querySelectorAll(".quickNav a").forEach(a=>a.addEventListener("click",()=>{
     const target=document.querySelector(a.getAttribute("href"));
     if(target&&target.tagName==="DETAILS")target.open=true;
@@ -387,6 +389,22 @@ function bindActions(payload){
     {key:"title",label:"Comercio"},{key:"person",label:"Persona"},{key:"whatsapp",label:"WhatsApp"},{key:"localidad",label:"Localidad"},{key:"interes",label:"Interes"}
   ]);
   if(toggle)toggle.onclick=()=>{showPrivate=!showPrivate;render()};
+}
+function shareSurveyWhatsApp(){
+  const message=`📢 IMPORTANTE — PROYECTO EN IGLESIA
+
+Se está evaluando la posibilidad de implementar un nuevo servicio de delivery para comercios locales, para poder recibir en casa productos de negocios de la zona y no solamente comida.
+
+Para conocer si esta propuesta realmente sería útil para los vecinos de Las Flores, se está realizando una breve encuesta.
+
+🕐 Lleva menos de 2 minutos y tu opinión es muy importante para el proyecto.
+
+👉 Encuesta: https://forms.gle/7aywd7CX8t4Harcq6
+
+Si vivís en Las Flores, te invitamos a participar y, si podés, compartirla con otras personas de la zona para que puedan dar también su opinión.
+
+¡Muchas gracias por colaborar! 🙌`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(message)}`,"_blank","noopener");
 }
 function makeDetail(title,nodes,id){
   const detail=document.createElement("details");
